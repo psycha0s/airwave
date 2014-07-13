@@ -61,5 +61,8 @@ target_link_libraries(${TARGET_NAME}
 )
 
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION bin)
-install(FILES ${TARGET_NAME}.png DESTINATION share/icons/hicolor/48x48/apps)
+
+install(FILES icons/${TARGET_NAME}.png
+	DESTINATION share/icons/hicolor/48x48/apps)
+
 install(FILES ${TARGET_NAME}.desktop DESTINATION share/applications)

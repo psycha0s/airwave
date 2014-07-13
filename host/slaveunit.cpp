@@ -204,7 +204,7 @@ void SlaveUnit::destroyEditorWindow()
 {
 	if(hwnd_) {
 		DestroyWindow(hwnd_);
-		UnregisterClass(kWindowClass, module_);
+		UnregisterClass(kWindowClass, GetModuleHandle(nullptr));
 		hwnd_ = 0;
 	}
 }

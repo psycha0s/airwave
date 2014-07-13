@@ -373,25 +373,13 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 	case effGetParamDisplay:
 	case effGetProgramName:
 	case effSetProgramName:
+	case effGetParameterProperties:
+	case effGetOutputProperties:
+	case effGetInputProperties:
+	case effGetMidiKeyName:
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				frame->value, frame->data, frame->opt);
 		break;
-
-	case effGetParameterProperties: {
-		VstParameterProperties properties;
-		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
-				frame->value, &properties, frame->opt);
-
-		std::memcpy(&frame->data, &properties, sizeof(VstParameterProperties));
-		break; }
-
-	case effGetMidiKeyName: {
-		MidiKeyName midiKeyName;
-		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
-				frame->value, &midiKeyName, frame->opt);
-
-		std::memcpy(&frame->data, &midiKeyName, sizeof(MidiKeyName));
-		break; }
 
 	case effProcessEvents: {
 		VstEvent* events = reinterpret_cast<VstEvent*>(frame->data);
@@ -483,14 +471,20 @@ intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 	case audioMasterAutomate:
 	case audioMasterBeginEdit:
 	case audioMasterEndEdit:
-	case audioMasterGetCurrentProcessLevel:
-//	case audioMasterUpdateDisplay:
+	case audioMasterUpdateDisplay:
 	case audioMasterGetVendorVersion:
+	case audioMasterIOChanged:
+	case audioMasterSizeWindow:
+	case audioMasterGetInputLatency:
+	case audioMasterGetOutputLatency:
+	case audioMasterGetCurrentProcessLevel:
+	case audioMasterGetAutomationState:
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;
 
 	case audioMasterIdle:
+	case __audioMasterNeedIdleDeprecated:
 		// There is no need to translate this request to the VST host, because
 		// we can simply call the dispatcher.
 		effect_->dispatcher(effect_, effEditIdle, 0, 0, nullptr, 0.0f);

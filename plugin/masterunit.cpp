@@ -196,8 +196,13 @@ intptr_t MasterUnit::handleAudioMaster()
 	case audioMasterBeginEdit:
 	case audioMasterEndEdit:
 	case audioMasterUpdateDisplay:
-	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetVendorVersion:
+	case audioMasterIOChanged:
+	case audioMasterSizeWindow:
+	case audioMasterGetInputLatency:
+	case audioMasterGetOutputLatency:
+	case audioMasterGetCurrentProcessLevel:
+	case audioMasterGetAutomationState:
 		return masterProc_(&effect_, frame->opcode, frame->index, frame->value,
 				nullptr, frame->opt);
 
@@ -220,13 +225,12 @@ intptr_t MasterUnit::handleAudioMaster()
 		return 0; }
 
 	case audioMasterProcessEvents: {
-/*		LOG("kAudioMasterProcessEvents");
+		LOG("kAudioMasterProcessEvents");
 		VstEvent* events = reinterpret_cast<VstEvent*>(frame->data);
 		lastEvents_.reload(frame->index, events);
 		VstEvents* e = lastEvents_.events();
 
-		return masterProc_(&effect_, frame->opcode, 0, 0, e, 0.0f); }*/
-		return 1; }
+		return masterProc_(&effect_, frame->opcode, 0, 0, e, 0.0f); }
 	}
 
 	LOG("Unhandled audio master event: %s", kAudioMasterEvents[frame->opcode]);
@@ -269,6 +273,9 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 	case effBeginSetProgram:
 	case effEndSetProgram:
 	case effStopProcess:
+	case effGetNumMidiInputChannels:
+	case effGetNumMidiOutputChannels:
+	case effSetPanLaw:
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;
@@ -409,6 +416,14 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 		std::memcpy(ptr, frame->data, sizeof(VstParameterProperties));
 		return frame->value;
 
+	case effGetOutputProperties:
+	case effGetInputProperties:
+		port->sendRequest();
+		port->waitResponse();
+
+		std::memcpy(ptr, frame->data, sizeof(VstPinProperties));
+		return frame->value;
+
 	case effGetProgramNameIndexed: {
 		port->sendRequest();
 		port->waitResponse();
@@ -438,6 +453,12 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value; }
+
+//	case effGetChunk:
+//		return frame->value;
+
+//	case effSetChunk:
+//		return frame->value;
 	}
 
 	LOG("Unhandled dispatch event: %s", kDispatchEvents[opcode]);

@@ -1,0 +1,102 @@
+Airwave is a WINE-based VST bridge, that allows to use Windows VST 2.4 plugins
+with Linux VST hosts.
+
+A distinctive feature, in comparison with analogues, is the use of shared memory
+to exchange data. Due to this only one extra copying is made for each data
+transfer. Airwave also uses the XEMBED protocol to embed the plugin
+editor into the host window.
+
+Currently, only the 32-bit VST plugins are supported, but this is due to lack of
+time for testing the 64-bit code, and not due to the technical difficulties.
+It is the initial version that has many things, which are not implemented yet
+and of course it can contain a lot of bugs. However, it allows to work good
+enough with many VST plugins.
+
+Tested VST hosts:
+- Bitwig Studio - works good
+- Renoise Tracker (demo) - works, only the few basic tests were made
+
+Tested VST plugins:
+- Synth1 by Ichiro Toda - works good
+- u-he Zebra2 (demo) - works good
+- u-he Diva (demo) - has some sound glitches, needs to debug
+- u-he ACE (demo) - works, only the few basic tests were made
+- ReFX Vanguard - works good, has some drawing issues
+- Native Instruments FM8 (demo) - works, only the few basic tests were made
+
+Known issues:
+- There is some hack for embedding the editor window. You have a chance to get
+  the black window instead of plugin editor ;-)
+- Handling of the effGetChunk/effSetChunk events is not implemented. Bank/preset
+  load/save operations may not work.
+
+1. Requirements
+- WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
+  but earlier versions also may work).
+
+- 32-bit version of libmagic on the x86_64 architecture (or just a "file"
+  package on the x86).
+
+- Qt4 for building the GUI utility application.
+
+- Multilib-enabled toolchain for building 32-bit binaries on the x86_64.
+
+- CMake >= 2.8 for building.
+
+- GIT for getting the project source code.
+
+
+2. Building the source
+If you use the Arch Linux, then you can get the latest development version
+by installing airwave-git package from the AUR. In other case use the following
+instructions for building:
+
+First of all, you should unpack Steinberg VST 2.4 SDK archive to the source
+directory. Currently, Steinberg website allows download only VST3 SDK and if you
+unable to get 2.4 version, you could use the latest SDK, as it contains VST 2.4
+headers anyway. Check the http://www.steinberg.net/en/company/developers.html
+for proceed.
+
+Second, the following commands should be executed from the source directory
+(substitute your values ​inside of the angle brackets):
+
+mkdir build && cd build
+
+cmake .. -DCMAKE_INSTALL_PREFIX=<installation prefix> \
+         -DCMAKE_BUILD_TYPE="Release"                 \
+         -DVSTSDK_PATH=<path to VST SDK>
+make
+make install
+
+Please note, that some runtime-critical paths are hard-coded relative to the
+CMAKE_INSTALL_PREFIX at compile-time. So you should install files properly, and
+not just build and left them in place.
+
+
+3. How does it work?
+The project consist of four components:
+- native VST plugin shared library (airwave-plugin-32.so).
+- winelib VST host binary (airwave-host-32.exe.so and airwave-host-32.exe
+  launcher script).
+- configuration file (${XDG_CONFIG_PATH}/airwave/airwave.conf), where all link
+  information is stored.
+- GUI configuration utility (airwave-utility).
+
+When the airwave-plugin gets loaded, it obtains its own full path and use it
+for extracting from the configuration file the record of bound VST dll. If this
+record is found, airwave-plugin executes the airwave-host process, passing it
+the path to the real VST dll file. After that, airwave-plugin and airwave-host
+acts together like a proxy, translating commands between the real VST host and
+the real VST plugin.
+
+
+4. How to use it?
+Use the airwave-utility for create links to VST dlls. To do this, select the VST
+dll file in the left view, then go to the directory, where you want to place
+your link file in the right view, and then press the "create link" button.
+Note, that you cannot just move created link files to other directories
+manually. The configuration file should be updated accordingly. So it is easier
+to do all link management with the help of the airwave-utility application.
+Also note, that after updating the airwave to the newer version, all your link
+files should be updated. You can do this in airwave-utility by clicking on the
+"recreate links" button.

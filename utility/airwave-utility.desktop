@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Aiwave utility application
+Comment=Tool for configuring the Airwave VST bridge
+Exec=airwave-utility
+Icon=airwave-utility
+Terminal=false
+Categories=Multimedia

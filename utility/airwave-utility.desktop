@@ -6,4 +6,4 @@ Comment=Tool for configuring the Airwave VST bridge
 Exec=airwave-utility
 Icon=airwave-utility
 Terminal=false
-Categories=Multimedia
+Categories=Multimedia;AudioVideo;Player;Recorder;

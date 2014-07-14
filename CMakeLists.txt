@@ -7,7 +7,7 @@ project(${PROJECT_NAME})
 # Project version
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 3)
-set(VERSION_PATCH 0)
+set(VERSION_PATCH 1)
 
 # Internal communication protocol version. Increase this value, when you break
 # backward compatibility.

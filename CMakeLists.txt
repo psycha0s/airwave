@@ -17,14 +17,14 @@ set(PROTOCOL_VERSION 1)
 set(PLUGIN_BASENAME ${PROJECT_NAME}-plugin)
 
 # Set plugin shared library location
-set(PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}share/${PROJECT_NAME}/
+set(PLUGIN_PATH ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/
 	CACHE PATH "Path to the plugin shared library.")
 
 # Set host binary base name
 set(HOST_BASENAME ${PROJECT_NAME}-host)
 
 # Set host binary location
-set(HOST_PATH ${CMAKE_INSTALL_PREFIX}bin/
+set(HOST_PATH ${CMAKE_INSTALL_PREFIX}/bin/
 	CACHE PATH "Path to the host binary.")
 
 

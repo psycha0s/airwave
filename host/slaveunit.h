@@ -3,7 +3,7 @@
 
 #include <atomic>
 #include <string>
-#include <windows.h>
+#include <wine/windows/windows.h>
 #include "config.h"
 #include "common/dataport.h"
 #include "common/eventsignal.h"

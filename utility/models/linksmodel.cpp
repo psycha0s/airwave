@@ -90,11 +90,11 @@ QVariant LinksModel::headerData(int section, Qt::Orientation orientation,
 
 bool LinksModel::setLink(const QString& pluginPath, const QString& bridgePath)
 {
-//	ModuleInfo::Arch bridgeArch = info_.getArch(bridgePath);
-//	ModuleInfo::Arch pluginArch = info_.getArch(pluginPath);
+	ModuleInfo::Arch bridgeArch = info_.getArch(bridgePath);
+	ModuleInfo::Arch pluginArch = info_.getArch(pluginPath);
 
-//	if(bridgeArch != pluginArch || bridgeArch == ModuleInfo::kArchUnknown)
-//		return false;
+	if(bridgeArch != pluginArch || bridgeArch == ModuleInfo::kArchUnknown)
+		return false;
 
 	linkManager_.bind(bridgePath.toStdString(), pluginPath.toStdString());
 	reload();

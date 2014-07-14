@@ -39,7 +39,7 @@ ModuleInfo::Arch ModuleInfo::getArch(const QString& fileName) const
 	if(buffer) {
 		QString string = buffer;
 
-		if(string.indexOf("") != -1) {
+		if(string.indexOf("80386") != -1) {
 			return kArch32;
 		}
 		else if(string.indexOf("x86-64") != -1) {

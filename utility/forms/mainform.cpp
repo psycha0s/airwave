@@ -229,7 +229,7 @@ void MainForm::onCreateLinkButtonClicked()
 	if(dialog.exec()) {
 		QString fileName = dialog.linkName() + ".so";
 
-		if(!linksModel_->setLink(pluginPath, bridgePath + fileName)) {
+		if(!linksModel_->setLink(pluginPath, libraryPath)) {
 			QString message = tr("The dll file has uncompatible architecture.");
 			QMessageBox::critical(this, tr("Error"), message);
 			return;

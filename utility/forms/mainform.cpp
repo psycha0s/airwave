@@ -229,7 +229,10 @@ void MainForm::onCreateLinkButtonClicked()
 	if(dialog.exec()) {
 		QString fileName = dialog.linkName() + ".so";
 		QFile::copy(libraryPath, bridgePath + fileName);
-		linksModel_->setLink(pluginPath, bridgePath + fileName);
+		if(!linksModel_->setLink(pluginPath, bridgePath + fileName)) {
+			QString message = tr("Unable to save configuration file.");
+			QMessageBox::critical(this, tr("Error"), message);
+		}
 	}
 }
 

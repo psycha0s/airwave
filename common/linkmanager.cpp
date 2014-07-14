@@ -12,8 +12,7 @@ namespace Airwave {
 
 
 LinkManager::LinkManager() :
-	isInitialized_(false),
-	isChanged_(false)
+	isInitialized_(false)
 {
 	magic_ = magic_open(MAGIC_NONE);
 	if(!magic_) {
@@ -60,9 +59,6 @@ LinkManager::LinkManager() :
 
 LinkManager::~LinkManager()
 {
-	if(isChanged_)
-		save();
-
 	magic_close(magic_);
 }
 
@@ -102,8 +98,12 @@ LinkManager::Arch LinkManager::pluginArch(const std::string& bridgePath) const
 bool LinkManager::bind(const std::string& bridgePath,
 		const std::string& pluginPath)
 {
-	isChanged_ = true;
-	return setLink(bridgePath, pluginPath);
+	if(setLink(bridgePath, pluginPath)) {
+		save();
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -115,6 +115,7 @@ bool LinkManager::rebind(const std::string& bridgePath,
 			std::string pluginPath = it.second;
 			pluginByBridge32_.erase(bridgePath);
 			pluginByBridge32_[newPath] = pluginPath;
+			save();
 			return true;
 		}
 	}
@@ -124,6 +125,7 @@ bool LinkManager::rebind(const std::string& bridgePath,
 			std::string pluginPath = it.second;
 			pluginByBridge32_.erase(bridgePath);
 			pluginByBridge64_[newPath] = pluginPath;
+			save();
 			return true;
 		}
 	}
@@ -134,7 +136,12 @@ bool LinkManager::rebind(const std::string& bridgePath,
 
 bool LinkManager::unbind(const std::string& bridgePath)
 {
-	return pluginByBridge32_.erase(bridgePath) > 0;
+	if(pluginByBridge32_.erase(bridgePath) > 0) {
+		save();
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -212,7 +219,6 @@ bool LinkManager::save()
 	for(auto it : pluginByBridge64_)
 		file << it.first << " = " << it.second << std::endl;
 
-	isChanged_ = false;
 	return true;
 }
 

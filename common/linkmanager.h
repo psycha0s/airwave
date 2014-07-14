@@ -34,7 +34,6 @@ public:
 
 private:
 	bool isInitialized_;
-	bool isChanged_;
 	std::string configPath_;
 	magic_t magic_;
 	std::map<std::string, std::string> pluginByBridge32_;

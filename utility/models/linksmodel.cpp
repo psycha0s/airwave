@@ -90,13 +90,15 @@ QVariant LinksModel::headerData(int section, Qt::Orientation orientation,
 
 bool LinksModel::setLink(const QString& pluginPath, const QString& bridgePath)
 {
-	if(linkManager_.bind(bridgePath.toStdString(),
-			pluginPath.toStdString())) {
-		reload();
-		return true;
-	}
+	ModuleInfo::Arch bridgeArch = info_.getArch(bridgePath);
+	ModuleInfo::Arch pluginArch = info_.getArch(pluginPath);
 
-	return false;
+	if(bridgeArch != pluginArch || bridgeArch == ModuleInfo::kArchUnknown)
+		return false;
+
+	linkManager_.bind(bridgePath.toStdString(), pluginPath.toStdString());
+	reload();
+	return true;
 }
 
 
@@ -128,12 +130,12 @@ void LinksModel::reload()
 
 	for(const std::string& bridgePath : linkManager_.boundBridges()) {
 		std::string pluginPath = linkManager_.pluginPath(bridgePath);
-		LinkManager::Arch arch = linkManager_.pluginArch(bridgePath);
+		ModuleInfo::Arch arch = info_.getArch(bridgePath.c_str());
 		QString architecture;
-		if(arch == LinkManager::kArch32) {
+		if(arch == ModuleInfo::kArch32) {
 			architecture = tr("32-bit");
 		}
-		else if(arch == LinkManager::kArch64) {
+		else if(arch == ModuleInfo::kArch64) {
 			architecture = tr("64-bit");
 		}
 		else {

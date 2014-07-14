@@ -8,7 +8,6 @@ set(TARGET_NAME ${PLUGIN_BASENAME})
 set(FIND_LIBRARY_USE_LIB64_PATHS OFF)
 
 find_package(LibDl REQUIRED)
-find_package(LibMagic REQUIRED)
 find_package(Threads REQUIRED)
 find_package(X11 REQUIRED)
 
@@ -16,7 +15,6 @@ find_package(X11 REQUIRED)
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
-	${LIBMAGIC_INCLUDE_DIR}
 	${X11_INCLUDE_DIR}
 )
 
@@ -51,7 +49,6 @@ set_target_properties(${TARGET_NAME}-32 PROPERTIES
 
 # Link with libraries
 target_link_libraries(${TARGET_NAME}-32
-	${LIBMAGIC_LIBRARY}
 	${LIBDL_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT}
 	${X11_X11_LIB}

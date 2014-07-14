@@ -1,8 +1,6 @@
 #include "linkmanager.h"
 
-#include <cstdlib>
 #include <fstream>
-#include <stdexcept>
 #include "config.h"
 #include "filesystem.h"
 #include "logger.h"
@@ -14,18 +12,6 @@ namespace Airwave {
 LinkManager::LinkManager() :
 	isInitialized_(false)
 {
-	magic_ = magic_open(MAGIC_NONE);
-	if(!magic_) {
-		LOG("Unable to initialize libmagic.");
-		return;
-	}
-
-	if(magic_load(magic_, nullptr) != 0) {
-		LOG("libmagic error: %s", magic_error(magic_));
-		magic_close(magic_);
-		return;
-	}
-
 	const char* string = getenv("XDG_CONFIG_PATH");
 	std::string configPath = string ? string : std::string();
 	if(configPath.empty())
@@ -37,7 +23,6 @@ LinkManager::LinkManager() :
 
 	if(!FileSystem::isDirExists(configPath)) {
 		LOG("Configuration directory '%s' is not exists.", configPath.c_str());
-		magic_close(magic_);
 		return;
 	}
 
@@ -57,12 +42,6 @@ LinkManager::LinkManager() :
 }
 
 
-LinkManager::~LinkManager()
-{
-	magic_close(magic_);
-}
-
-
 bool LinkManager::isInitialized() const
 {
 	return isInitialized_;
@@ -71,27 +50,11 @@ bool LinkManager::isInitialized() const
 
 std::string LinkManager::pluginPath(const std::string& bridgePath) const
 {
-	auto it = pluginByBridge32_.find(bridgePath);
-	if(it != pluginByBridge32_.end())
-		return it->second;
-
-	it = pluginByBridge64_.find(bridgePath);
-	if(it != pluginByBridge64_.end())
+	auto it = pluginByBridge_.find(bridgePath);
+	if(it != pluginByBridge_.end())
 		return it->second;
 
 	return std::string();
-}
-
-
-LinkManager::Arch LinkManager::pluginArch(const std::string& bridgePath) const
-{
-	if(pluginByBridge32_.find(bridgePath) != pluginByBridge32_.end())
-		return kArch32;
-
-	if(pluginByBridge64_.find(bridgePath) != pluginByBridge64_.end())
-		return kArch64;
-
-	return kArchUnknown;
 }
 
 
@@ -110,21 +73,11 @@ bool LinkManager::bind(const std::string& bridgePath,
 bool LinkManager::rebind(const std::string& bridgePath,
 		const std::string& newPath)
 {
-	for(auto it : pluginByBridge32_) {
+	for(auto it : pluginByBridge_) {
 		if(it.first == bridgePath) {
 			std::string pluginPath = it.second;
-			pluginByBridge32_.erase(bridgePath);
-			pluginByBridge32_[newPath] = pluginPath;
-			save();
-			return true;
-		}
-	}
-
-	for(auto it : pluginByBridge64_) {
-		if(it.first == bridgePath) {
-			std::string pluginPath = it.second;
-			pluginByBridge32_.erase(bridgePath);
-			pluginByBridge64_[newPath] = pluginPath;
+			pluginByBridge_.erase(bridgePath);
+			pluginByBridge_[newPath] = pluginPath;
 			save();
 			return true;
 		}
@@ -136,7 +89,7 @@ bool LinkManager::rebind(const std::string& bridgePath,
 
 bool LinkManager::unbind(const std::string& bridgePath)
 {
-	if(pluginByBridge32_.erase(bridgePath) > 0) {
+	if(pluginByBridge_.erase(bridgePath) > 0) {
 		save();
 		return true;
 	}
@@ -149,52 +102,17 @@ std::vector<std::string> LinkManager::boundBridges() const
 {
 	std::vector<std::string> result;
 
-	for(auto it : pluginByBridge32_)
-		result.push_back(it.first);
-
-	for(auto it : pluginByBridge64_)
+	for(auto it : pluginByBridge_)
 		result.push_back(it.first);
 
 	return result;
 }
 
 
-LinkManager::Arch LinkManager::getArchitecture(const std::string& path) const
-{
-	const char* buffer = magic_file(magic_, path.c_str());
-
-	if(buffer) {
-		std::string string = buffer;
-
-		if(string.find("80386") != std::string::npos) {
-			return kArch32;
-		}
-		else if(string.find("x86-64") != std::string::npos) {
-			return kArch64;
-		}
-
-	}
-
-	return kArchUnknown;
-}
-
-
 bool LinkManager::setLink(const std::string& bridgePath,
 		const std::string& pluginPath)
 {
-	Arch bridgeArch = getArchitecture(bridgePath);
-	Arch pluginArch = getArchitecture(pluginPath);
-
-	if(bridgeArch != pluginArch || bridgeArch == kArchUnknown)
-		return false;
-
-	if(bridgeArch == kArch32) {
-		pluginByBridge32_[bridgePath] = pluginPath;
-	}
-	else {
-		pluginByBridge64_[bridgePath] = pluginPath;
-	}
-
+	pluginByBridge_[bridgePath] = pluginPath;
 	return true;
 }
 
@@ -213,10 +131,7 @@ bool LinkManager::save()
 	if(!file.is_open())
 		return false;
 
-	for(auto it : pluginByBridge32_)
-		file << it.first << " = " << it.second << std::endl;
-
-	for(auto it : pluginByBridge64_)
+	for(auto it : pluginByBridge_)
 		file << it.first << " = " << it.second << std::endl;
 
 	return true;

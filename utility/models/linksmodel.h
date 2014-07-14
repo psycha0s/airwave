@@ -2,6 +2,7 @@
 #define UTILITY_MODELS_LINKSMODEL_H
 
 #include "generictreemodel.h"
+#include "moduleinfo.h"
 #include "common/linkmanager.h"
 
 
@@ -41,6 +42,7 @@ public:
 
 private:
 	Airwave::LinkManager linkManager_;
+	ModuleInfo info_;
 
 	void reload();
 };

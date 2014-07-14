@@ -21,6 +21,7 @@ include_directories(
 # Common sources
 set(SOURCES
 	main.cpp
+	moduleinfo.cpp
 	../common/filesystem.cpp
 	../common/logger.cpp
 	../common/linkmanager.cpp

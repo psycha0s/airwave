@@ -228,11 +228,14 @@ void MainForm::onCreateLinkButtonClicked()
 	dialog.setLinkName(name);
 	if(dialog.exec()) {
 		QString fileName = dialog.linkName() + ".so";
-		QFile::copy(libraryPath, bridgePath + fileName);
+
 		if(!linksModel_->setLink(pluginPath, bridgePath + fileName)) {
-			QString message = tr("Unable to save configuration file.");
+			QString message = tr("The dll file has uncompatible architecture.");
 			QMessageBox::critical(this, tr("Error"), message);
+			return;
 		}
+
+		QFile::copy(libraryPath, bridgePath + fileName);
 	}
 }
 

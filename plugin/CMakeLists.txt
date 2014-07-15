@@ -19,10 +19,6 @@ include_directories(
 )
 
 
-# Configure socket filename for logger
-add_definitions(-DLOG_SOCK_PATH="/tmp/${TARGET_NAME}.sock")
-
-
 # Common sources
 set(SOURCES
 	../common/dataport.cpp

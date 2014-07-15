@@ -27,6 +27,16 @@ set(HOST_BASENAME ${PROJECT_NAME}-host)
 set(HOST_PATH ${CMAKE_INSTALL_PREFIX}/bin/
 	CACHE PATH "Path to the host binary.")
 
+# Configure logger
+option(ENABLE_LOGGER "Enable sending log message to the airwave-utility." ON)
+
+set(LOG_SOCKET_PATH "/tmp/${PROJECT_NAME}.sock"
+	CACHE PATH "Path to the log socket.")
+
+# Run cmake with parameter -DBUILD_UTILITY=OFF for disable build the
+# GUI utility application.
+option(BUILD_UTILITY "Build the GUI utility (Qt4)." ON)
+
 
 # Create config.h header
 configure_file(
@@ -87,11 +97,6 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${VSTSDK_INCLUDE_DIR}
 )
-
-
-# Run cmake with parameter -DBUILD_UTILITY=OFF for disable build the
-# GUI utility application.
-option(BUILD_UTILITY "Build the GUI utility (Qt4)." ON)
 
 
 # Project sources

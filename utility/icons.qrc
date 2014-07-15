@@ -7,5 +7,9 @@
         <file>icons/recreate-links.png</file>
         <file>icons/remove-link.png</file>
         <file>icons/show-linked.png</file>
+        <file>icons/autoscroll.png</file>
+        <file>icons/clear.png</file>
+        <file>icons/bug.png</file>
+        <file>icons/word-wrap.png</file>
     </qresource>
 </RCC>

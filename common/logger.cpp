@@ -3,64 +3,83 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include <unistd.h>
 #include <linux/un.h>
 #include <sys/socket.h>
+#include <vector>
+#include "types.h"
 
 
-#ifdef DEBUG_BUILD
-
-#ifndef LOG_SOCK_PATH
-#define LOG_SOCK_PATH "/tmp/log.sock"
-#endif // LOG_SOCK_PATH
+static int fd = -1;
+static std::string id;
+static std::vector<char> buffer;
 
 
-struct Log {
-	int fd_;
-
-	Log()
-	{
-/*		fd_ = socket(PF_UNIX, SOCK_STREAM, 0);
-		if(fd_ < 0)
-			return;
-
-		sockaddr_un address;
-		memset(&address, 0, sizeof(sockaddr_un));
-		address.sun_family = AF_UNIX;
-		snprintf(address.sun_path, UNIX_PATH_MAX, LOG_SOCK_PATH);
-
-		if(connect(fd_, reinterpret_cast<sockaddr*>(&address),
-				sizeof(sockaddr_un)) != 0) {
-			close(fd_);
-			fd_ = -1;
-		}*/
-	}
-
-
-	~Log()
-	{
-/*		if(fd_ >= 0)
-			close(fd_);*/
-	}
-};
-
-
-static Log logger;
-
-
-void debug(const char* format, ...)
+bool loggerInit(const std::string& senderId)
 {
-	va_list args;
-	va_start(args, format);
+	fd = socket(AF_UNIX, SOCK_DGRAM, 0);
+	if(fd < 0)
+		return false;
 
-//	vdprintf(logger.fd_, format, args);
-	vfprintf(stdout, format, args);
+	sockaddr_un address;
+	memset(&address, 0, sizeof(sockaddr_un));
+	address.sun_family = AF_UNIX;
+	snprintf(address.sun_path, UNIX_PATH_MAX, LOG_SOCKET_PATH);
 
-	va_end(args);
+	if(connect(fd, reinterpret_cast<sockaddr*>(&address),
+			sizeof(sockaddr_un)) != 0) {
+		close(fd);
+		fd = -1;
+		return false;
+	}
 
-//	fsync(logger.fd_);
-	fflush(stdout);
+	id = senderId;
+
+	// FIXME
+	buffer.resize(1024);
+	return true;
 }
 
 
-#endif
+
+void loggerFree()
+{
+	if(fd >= 0) {
+		close(fd);
+		id.clear();
+	}
+}
+
+
+void loggerLogMessage(const char* format, ...)
+{
+	timespec tm;                                                           \
+	clock_gettime(CLOCK_REALTIME, &tm);                                    \
+
+	uint64_t* timeStamp = reinterpret_cast<uint64_t*>(buffer.data());
+	*timeStamp = (static_cast<uint64_t>(tm.tv_sec) << 32) + tm.tv_nsec;
+
+	char* output = buffer.data() + sizeof(uint64_t);
+	output = std::copy(id.begin(), id.end(), output);
+	*output = '\x01';
+	++output;
+
+	size_t count = output - buffer.data();
+
+	va_list args;
+	va_start(args, format);
+
+	count += std::vsnprintf(output, buffer.size() - count, format, args) + 1;
+
+	va_end(args);
+
+	send(fd, buffer.data(), count, 0);
+	fsync(fd);
+}
+
+
+void loggerSetSenderId(const std::string& senderId)
+{
+	id = senderId;
+}

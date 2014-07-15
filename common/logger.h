@@ -1,26 +1,27 @@
-#ifndef COMMON_LOGGER_H_
-#define COMMON_LOGGER_H_
+#ifndef COMMON_LOGGER_H
+#define COMMON_LOGGER_H
 
-#include <ctime>
-
-
-#ifdef DEBUG_BUILD
-
-#define LOG(format, ...)                                                       \
-	do {                                                                       \
-		timespec tm;                                                           \
-		clock_gettime(CLOCK_REALTIME, &tm);                                    \
-		debug("%lu.%09lu: " format "\n", tm.tv_sec, tm.tv_nsec, ##__VA_ARGS__);\
-	} while(0)
+#include <string>
+#include "config.h"
+#include "types.h"
 
 
-void debug(const char* format, ...);
+#ifdef ENABLE_LOGGER
+
+#define LOG(format, ...) loggerLogMessage(format, ##__VA_ARGS__)
 
 #else
 
-#define LOG(format, ...) do { } while(0)
+#define LOG(format, ...)
 
 #endif
 
 
-#endif // COMMON_LOGGER_H_
+bool loggerInit(const std::string& senderId);
+void loggerFree();
+void loggerLogMessage(const char* format, ...);
+void loggerSetSenderId(const std::string& senderId);
+
+
+
+#endif // COMMON_LOGGER_H

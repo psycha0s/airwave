@@ -122,4 +122,14 @@ std::string FileSystem::fullNameFromPath(const std::string& fileName)
 }
 
 
+std::string FileSystem::baseName(const std::string& path)
+{
+	size_t pos = path.rfind('/');
+	if(pos != std::string::npos)
+		return path.substr(pos + 1);
+
+	return path;
+}
+
+
 } // namespace Airwave

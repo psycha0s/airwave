@@ -27,7 +27,9 @@ void signalHandler(int signum)
 
 AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 {
-	LOG("VST bridge plugin %s -----------------------------", PROJECT_VERSION);
+	loggerInit(PLUGIN_BASENAME);
+
+	LOG("Starting Airwave master unit %s", PROJECT_VERSION);
 
 	// FIXME Without this signal handler the Renoise tracker is unable to start
 	// child wine application.
@@ -40,6 +42,8 @@ AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 		LOG("Unable to get library filename.");
 		return nullptr;
 	}
+
+	loggerSetSenderId(FileSystem::baseName(info.dli_fname));
 
 	std::string selfPath = FileSystem::realPath(info.dli_fname);
 	LOG("Plugin binary: '%s'", selfPath.c_str());
@@ -91,7 +95,7 @@ AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 		return nullptr;
 	}
 
-	LOG("VST bridge plugin initialized.");
+	LOG("Master unit initialized.");
 	return masterUnit->effect();
 }
 

@@ -1,21 +1,30 @@
 #include <cstdlib>
 #include "config.h"
 #include "slaveunit.h"
+#include "common/filesystem.h"
 #include "common/logger.h"
 
 
-int main(int argc, char const* argv[])
+int main(int argc, const char* argv[])
 {
-	LOG("VST bridge host %s -------------------------------", PROJECT_VERSION);
+	using Airwave::FileSystem;
+
+	loggerInit(HOST_BASENAME);
+
+	LOG("Starting Airwave slave unit %s", PROJECT_VERSION);
 
 	if(argc != 3) {
 		LOG("Usage: %s <VST plugin path> <control port id>", argv[0]);
+		loggerFree();
 		return -1;
 	}
+
+	loggerSetSenderId(FileSystem::baseName(argv[1]));
 
 	Airwave::SlaveUnit slaveUnit;
 	if(!slaveUnit.initialize(argv[1], atoi(argv[2]))) {
 		LOG("Unable to initialize slave unit.");
+		loggerFree();
 		return -2;
 	}
 
@@ -30,6 +39,7 @@ int main(int argc, char const* argv[])
 		}
 	}
 
-	LOG("VST bridge host terminated.");
+	LOG("Slave unit terminated.");
+	loggerFree();
 	return 0;
 }

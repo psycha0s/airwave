@@ -22,14 +22,11 @@ set(CMAKE_C_COMPILER winegcc)
 set(CMAKE_CXX_COMPILER wineg++)
 
 
-# Configure socket filename for logger
-add_definitions(-DLOG_SOCK_PATH="/tmp/${TARGET_NAME}.sock")
-
-
 # Sources
 set(SOURCES
 	../common/dataport.cpp
 	../common/eventsignal.cpp
+	../common/filesystem.cpp
 	../common/logger.cpp
 	../common/vsteventkeeper.cpp
 	host.cpp

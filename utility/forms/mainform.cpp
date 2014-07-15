@@ -110,6 +110,30 @@ MainForm::MainForm(QWidget* parent) :
 
 	onCurrentLinkChanged();
 	onCurrentPluginChanged();
+
+
+	if(!logSocket_.listen(LOG_SOCKET_PATH))
+		qDebug("Unable to create logger socket.");
+
+	connect(&logSocket_,
+			SIGNAL(newMessage(quint64,QString,QString)),
+			ui_->logView,
+			SLOT(addMessage(quint64,QString,QString)));
+
+	connect(ui_->clearMessagesButton,
+			SIGNAL(clicked()),
+			ui_->logView,
+			SLOT(clear()));
+
+	connect(ui_->wordWrapButton,
+			SIGNAL(toggled(bool)),
+			ui_->logView,
+			SLOT(setWordWrap(bool)));
+
+	connect(ui_->autoScrollButton,
+			SIGNAL(toggled(bool)),
+			ui_->logView,
+			SLOT(setAutoScroll(bool)));
 }
 
 

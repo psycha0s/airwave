@@ -124,7 +124,7 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 	effect_.uniqueID               = info->uniqueId;
 	effect_.version                = info->version;
 
-	LOG("VST bridge plugin initialized.");
+	LOG("VST plugin summary:");
 	LOG("flags:         0x%08X", effect_.flags);
 	LOG("program count: %d",     effect_.numPrograms);
 	LOG("param count:   %d",     effect_.numParams);
@@ -152,7 +152,7 @@ MasterUnit::~MasterUnit()
 	int status;
 	waitpid(childPid_, &status, 0);
 
-	LOG("VST bridge plugin terminated.");
+	LOG("Master unit terminated.");
 }
 
 
@@ -291,10 +291,11 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 
 		LOG("Closing plugin..");
 		delete this;
+		loggerFree();
 		return 1;
 
 	case effSetBlockSize: {
-		LOG("kEffSetBlockSize: %d", value);
+		LOG("Setting block size to %d frames", value);
 		audioPort_.disconnect();
 
 		size_t frameSize = sizeof(DataFrame) + sizeof(double) *

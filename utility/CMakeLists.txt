@@ -20,6 +20,7 @@ include_directories(
 
 # Common sources
 set(SOURCES
+	logsocket.cpp
 	main.cpp
 	moduleinfo.cpp
 	../common/filesystem.cpp
@@ -30,6 +31,7 @@ set(SOURCES
 	models/dirlistmodel.cpp
 	models/linksmodel.cpp
 	widgets/elidedlabel.cpp
+	widgets/logview.cpp
 	widgets/nofocusdelegate.cpp
 	widgets/simpletreeview.cpp
 )

@@ -2,6 +2,7 @@
 #define UTILITY_FORMS_MAINFORM_H
 
 #include <QWidget>
+#include "logsocket.h"
 #include "models/dirlistmodel.h"
 #include "models/linksmodel.h"
 
@@ -23,6 +24,8 @@ private:
 	LinksModel* linksModel_;
 	DirListModel* sourceModel_;
 	DirListModel* targetModel_;
+
+	LogSocket logSocket_;
 
 private slots:
 	void onShowHiddenButtonToggled(bool value);

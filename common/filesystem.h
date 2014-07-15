@@ -15,6 +15,7 @@ public:
 	static bool makePath(const std::string& path);
 	static bool makeDir(const std::string& path);
 	static std::string fullNameFromPath(const std::string& fileName);
+	static std::string baseName(const std::string& path);
 };
 
 

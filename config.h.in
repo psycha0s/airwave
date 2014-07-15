@@ -19,6 +19,8 @@
 #define PLUGIN_PATH "@PLUGIN_PATH@"
 #define HOST_BASENAME "@HOST_BASENAME@"
 #define HOST_PATH "@HOST_PATH@"
+#cmakedefine ENABLE_LOGGER
+#define LOG_SOCKET_PATH "@LOG_SOCKET_PATH@"
 
 
 #endif // CONFIG_H

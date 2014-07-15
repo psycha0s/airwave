@@ -3,7 +3,6 @@
 #include <fstream>
 #include "config.h"
 #include "filesystem.h"
-#include "logger.h"
 
 
 namespace Airwave {
@@ -22,13 +21,10 @@ LinkManager::LinkManager() :
 		configPath += '/';
 
 	if(!FileSystem::isDirExists(configPath)) {
-		LOG("Configuration directory '%s' is not exists.", configPath.c_str());
 		return;
 	}
 
 	configPath_ = configPath + PROJECT_NAME "/" PROJECT_NAME ".conf";
-
-	LOG("Using configuration file: '%s'", configPath_.c_str());
 
 	std::ifstream file(configPath_);
 	if(file.is_open()) {

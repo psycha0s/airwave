@@ -54,6 +54,9 @@ void loggerFree()
 
 void loggerLogMessage(const char* format, ...)
 {
+	if(fd == -1)
+		return;
+
 	timespec tm;                                                           \
 	clock_gettime(CLOCK_REALTIME, &tm);                                    \
 
@@ -75,7 +78,6 @@ void loggerLogMessage(const char* format, ...)
 	va_end(args);
 
 	send(fd, buffer.data(), count, 0);
-	fsync(fd);
 }
 
 

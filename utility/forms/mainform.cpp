@@ -86,7 +86,7 @@ MainForm::MainForm(QWidget* parent) :
 			SLOT(onDirItemDoubleClicked(QModelIndex)));
 
 
-	setWindowTitle(QString(PROJECT_NAME) + " utility");
+	setWindowTitle(PROJECT_NAME " utility " PROJECT_VERSION);
 
 	ui_->splitter->setStretchFactor(0, 5);
 	ui_->splitter->setStretchFactor(1, 4);

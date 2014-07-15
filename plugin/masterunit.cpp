@@ -88,6 +88,7 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 		kill(childPid_, SIGKILL);
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
+		childPid_ = -1;
 		return;
 	}
 
@@ -100,6 +101,7 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 		LOG("Slave unit has incompatible protocol version: %d", frame->index);
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
+		childPid_ = -1;
 		return;
 	}
 
@@ -156,6 +158,9 @@ MasterUnit::~MasterUnit()
 
 AEffect* MasterUnit::effect()
 {
+	if(childPid_ == -1)
+		return nullptr;
+
 	return &effect_;
 }
 

@@ -104,6 +104,9 @@ add_subdirectory(host)
 add_subdirectory(plugin)
 
 if(BUILD_UTILITY)
+	include_directories(3rdparty)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/qtsingleapplication)
+
 	add_subdirectory(utility)
 else()
    message(STATUS "BUILD_UTILITY is OFF, skipping build of GUI utility.")

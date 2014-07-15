@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 2.8.6)
 # Target name
 set(TARGET_NAME ${PROJECT_NAME}-utility)
 
-
 # Find packages
 find_package(Qt4 REQUIRED)
 find_package(LibMagic REQUIRED)
@@ -61,6 +60,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC true)
 target_link_libraries(${TARGET_NAME}
 	${QT_LIBRARIES}
 	${LIBMAGIC_LIBRARY}
+	qtsingleapplication
 )
 
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION bin)

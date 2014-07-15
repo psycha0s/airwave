@@ -453,10 +453,10 @@ void SlaveUnit::handleProcessDouble()
 intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 		intptr_t value, void* ptr, float opt)
 {
-	if(opcode != audioMasterGetTime) { // filter out audioMasterGetTime
-		LOG("audioMaster(opcode: %s, index: %d, value: %d, ptr: %p, opt: %g)",
-			kAudioMasterEvents[opcode], index, value, ptr, opt);
-	}
+//	if(opcode != audioMasterGetTime) { // filter out audioMasterGetTime
+//		LOG("audioMaster(opcode: %s, index: %d, value: %d, ptr: %p, opt: %g)",
+//			kAudioMasterEvents[opcode], index, value, ptr, opt);
+//	}
 
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 	frame->command = Command::AudioMaster;

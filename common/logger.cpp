@@ -4,8 +4,8 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+#include <linux/un.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 
 
 #ifdef DEBUG_BUILD
@@ -27,7 +27,7 @@ struct Log {
 		sockaddr_un address;
 		memset(&address, 0, sizeof(sockaddr_un));
 		address.sun_family = AF_UNIX;
-		snprintf(address.sun_path, 108, LOG_SOCK_PATH);
+		snprintf(address.sun_path, UNIX_PATH_MAX, LOG_SOCK_PATH);
 
 		if(connect(fd_, reinterpret_cast<sockaddr*>(&address),
 				sizeof(sockaddr_un)) != 0) {

@@ -453,10 +453,10 @@ void SlaveUnit::handleProcessDouble()
 intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 		intptr_t value, void* ptr, float opt)
 {
-//	if(opcode != audioMasterGetTime) { // filter out audioMasterGetTime
-//		LOG("master(opcode: %s, index: %d, value: %d, ptr: %p, opt: %g)",
-//			kAudioMasterOpcodes[opcode], index, value, ptr, opt);
-//	}
+	if(opcode != audioMasterGetTime) { // filter out audioMasterGetTime
+		LOG("audioMaster(opcode: %s, index: %d, value: %d, ptr: %p, opt: %g)",
+			kAudioMasterEvents[opcode], index, value, ptr, opt);
+	}
 
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 	frame->command = Command::AudioMaster;
@@ -487,7 +487,8 @@ intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 	case __audioMasterNeedIdleDeprecated:
 		// There is no need to translate this request to the VST host, because
 		// we can simply call the dispatcher.
-		effect_->dispatcher(effect_, effEditIdle, 0, 0, nullptr, 0.0f);
+		if(isEditorOpen_)
+			effect_->dispatcher(effect_, effEditIdle, 0, 0, nullptr, 0.0f);
 		return 1;
 
 	case audioMasterGetVendorString: {

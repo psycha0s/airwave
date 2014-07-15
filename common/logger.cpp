@@ -57,8 +57,8 @@ void loggerLogMessage(const char* format, ...)
 	if(fd == -1)
 		return;
 
-	timespec tm;                                                           \
-	clock_gettime(CLOCK_REALTIME, &tm);                                    \
+	timespec tm;
+	clock_gettime(CLOCK_REALTIME, &tm);
 
 	uint64_t* timeStamp = reinterpret_cast<uint64_t*>(buffer.data());
 	*timeStamp = (static_cast<uint64_t>(tm.tv_sec) << 32) + tm.tv_nsec;

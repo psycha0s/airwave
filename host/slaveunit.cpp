@@ -263,7 +263,7 @@ void SlaveUnit::handleSetDataBlock(DataFrame* frame)
 
 bool SlaveUnit::handleDispatch(DataFrame* frame)
 {
-//	LOG("handleDispatch: %s", kDispatchOpcodes[frame->opcode]);
+//	LOG("handleDispatch: %s", kDispatchEvents[frame->opcode]);
 
 	switch(frame->opcode) {
 	case effClose:
@@ -400,6 +400,8 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 	case effGetOutputProperties:
 	case effGetInputProperties:
 	case effGetMidiKeyName:
+	case effBeginLoadBank:
+	case effBeginLoadProgram:
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				frame->value, frame->data, frame->opt);
 		break;
@@ -432,7 +434,7 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 		break; }
 
 	case effSetChunk: {
-		LOG("effSetChunk: %d", chunk_.size());
+		LOG("effSetChunk: %d bytes", chunk_.size());
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				chunk_.size(), chunk_.data(), frame->opt);
 

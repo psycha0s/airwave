@@ -33,7 +33,7 @@ int main(int argc, const char* argv[])
 	while(slaveUnit.processRequest()) {
 		MSG message;
 
-		if(PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
+		while(PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		}

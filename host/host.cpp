@@ -21,16 +21,16 @@ int main(int argc, const char* argv[])
 
 	loggerSetSenderId(FileSystem::baseName(argv[1]));
 
-	Airwave::SlaveUnit slaveUnit;
-	if(!slaveUnit.initialize(argv[1], atoi(argv[2]))) {
-		LOG("Unable to initialize slave unit.");
+	Airwave::SlaveUnit* slaveUnit = new Airwave::SlaveUnit;
+	if(!slaveUnit->initialize(argv[1], atoi(argv[2]))) {
+		LOG("Unable to initialize slave unit");
 		loggerFree();
 		return -2;
 	}
 
-	LOG("Slave unit initialized, starting to process events.");
+	LOG("Slave unit initialized, starting to process events");
 
-	while(slaveUnit.processRequest()) {
+	while(slaveUnit->processRequest()) {
 		MSG message;
 
 		while(PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
@@ -39,7 +39,9 @@ int main(int argc, const char* argv[])
 		}
 	}
 
-	LOG("Slave unit terminated.");
+	delete slaveUnit;
+
+	LOG("Slave unit terminated");
 	loggerFree();
 	return 0;
 }

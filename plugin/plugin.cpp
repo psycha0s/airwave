@@ -21,7 +21,12 @@ AEffect* mainStub(AudioMasterProc audioMasterProc) asm ("main");
 
 void signalHandler(int signum)
 {
-	LOG("Received signal %d", signum);
+	if(signum == SIGCHLD) {
+		LOG("Child process terminated");
+	}
+	else {
+		LOG("Received signal %d", signum);
+	}
 }
 
 
@@ -39,14 +44,14 @@ AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 	// Get path to own binary
 	Dl_info info;
 	if(dladdr(reinterpret_cast<void*>(VSTPluginMain), &info) == 0) {
-		LOG("Unable to get library filename.");
+		LOG("Unable to get library filename");
 		return nullptr;
 	}
 
 	loggerSetSenderId(FileSystem::baseName(info.dli_fname));
 
 	std::string selfPath = FileSystem::realPath(info.dli_fname);
-	LOG("Plugin binary: '%s'", selfPath.c_str());
+	LOG("Plugin binary: %s", selfPath.c_str());
 
 
 	// Find path of the host binary
@@ -66,13 +71,13 @@ AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 		hostPath = FileSystem::fullNameFromPath(hostName);
 
 		if(!FileSystem::isFileExists(hostPath)) {
-			LOG("Host binary does not found in '%s' and PATH.", HOST_PATH);
+			LOG("Host binary does not found in %s and PATH", HOST_PATH);
 			return nullptr;
 		}
 
 	}
 
-	LOG("Host binary: '%s'", hostPath.c_str());
+	LOG("Host binary:   %s", hostPath.c_str());
 
 
 	// Get path to the linked VST plugin binary
@@ -80,22 +85,22 @@ AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 	std::string pluginPath = linkManager.pluginPath(selfPath);
 
 	if(pluginPath.empty()) {
-		LOG("Bridge plugin is not linked with any VST plugin dll.");
+		LOG("Bridge plugin is not linked with any VST plugin dll");
 		return nullptr;
 	}
 
-	LOG("VST binary: '%s'", pluginPath.c_str());
+	LOG("VST binary:    %s", pluginPath.c_str());
 
 
 	// Initialize master unit.
 	MasterUnit* masterUnit;
 	masterUnit = new MasterUnit(pluginPath, hostPath, audioMasterProc);
 	if(!masterUnit->effect()) {
-		LOG("Unable to initialize master unit.");
+		LOG("Unable to initialize master unit");
 		return nullptr;
 	}
 
-	LOG("Master unit initialized.");
+	LOG("Master unit initialized");
 	return masterUnit->effect();
 }
 

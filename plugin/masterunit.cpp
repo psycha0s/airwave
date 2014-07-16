@@ -31,13 +31,13 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 
 	// FIXME: frame size should be verified.
 	if(!controlPort_.create(10240)) {
-		LOG("Unable to create control port.");
+		LOG("Unable to create control port");
 		return;
 	}
 
 	// FIXME: frame size should be verified.
 	if(!callbackPort_.create(1024)) {
-		LOG("Unable to create callback port.");
+		LOG("Unable to create callback port");
 		controlPort_.disconnect();
 		return;
 	}
@@ -45,14 +45,20 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 	// Start the slave unit's process.
 	childPid_ = fork();
 	if(childPid_ == -1) {
-		LOG("fork() call failed.");
+		LOG("fork() call failed");
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
 		return;
 	}
 	else if(childPid_ == 0) {
 //		setenv("WINELOADER", "/opt/wine-compholio/bin/wine", true);
-		LOG("WINELOADER: %s", getenv("WINELOADER"));
+		const char* wineLoader = getenv("WINELOADER");
+		if(wineLoader) {
+			LOG("WINELOADER: %s", wineLoader);
+		}
+		else {
+			LOG("WINELOADER is not set, using wine from PATH");
+		}
 
 		std::string id = std::to_string(controlPort_.id());
 
@@ -64,7 +70,7 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 		return;
 	}
 
-	LOG("Child process started: %d", childPid_);
+	LOG("Child process started, pid=%d", childPid_);
 
 	std::memset(&rect_, 0, sizeof(ERect));
 
@@ -80,11 +86,11 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 	frame->value = PROTOCOL_VERSION;
 	controlPort_.sendRequest();
 
-	LOG("Waiting for child response");
+	LOG("Waiting for child response...");
 
 	// Give slave unit the 3 seconds to initialize.
 	if(!controlPort_.waitResponse(3000)) {
-		LOG("Child process is not responding.");
+		LOG("Child process is not responding");
 		kill(childPid_, SIGKILL);
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
@@ -137,7 +143,7 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 
 MasterUnit::~MasterUnit()
 {
-	LOG("Waiting for callback thread termination.");
+	LOG("Waiting for callback thread termination...");
 
 	processCallbacks_.clear();
 	if(callbackThread_.joinable())
@@ -147,12 +153,12 @@ MasterUnit::~MasterUnit()
 	callbackPort_.disconnect();
 	audioPort_.disconnect();
 
-	LOG("Waiting for child process termination.");
+	LOG("Waiting for child process termination...");
 
 	int status;
 	waitpid(childPid_, &status, 0);
 
-	LOG("Master unit terminated.");
+	LOG("Master unit terminated");
 }
 
 
@@ -167,7 +173,7 @@ AEffect* MasterUnit::effect()
 
 void MasterUnit::callbackThread()
 {
-	LOG("Callback thread started.");
+	LOG("Callback thread started");
 
 	condition_.post();
 
@@ -290,7 +296,7 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 		port->sendRequest();
 		port->waitResponse();
 
-		LOG("Closing plugin..");
+		LOG("Closing plugin");
 		delete this;
 		loggerFree();
 		return 1;
@@ -303,7 +309,7 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 				(value * effect_.numInputs + value * effect_.numOutputs);
 
 		if(!audioPort_.create(frameSize)) {
-			LOG("Unable to create audio port.");
+			LOG("Unable to create audio port");
 			return 0;
 		}
 
@@ -477,7 +483,7 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 		size_t count = frame->index;
 
 		if(chunkSize == 0 || count == 0) {
-			LOG("effGetChunk is unsupported by the VST plugin.");
+			LOG("effGetChunk is unsupported by the VST plugin");
 			return 0;
 		}
 
@@ -495,14 +501,14 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 
 			size_t count = frame->index;
 			if(count == 0) {
-				LOG("effGetChunk: premature end of data transmission.");
+				LOG("effGetChunk: premature end of data transmission");
 				return 0;
 			}
 
 			it = std::copy(frame->data, frame->data + count, it);
 		}
 
-		LOG("effGetChunk: received %d bytes.", chunkSize);
+		LOG("effGetChunk: received %d bytes", chunkSize);
 
 		void** chunk = static_cast<void**>(ptr);
 		*chunk = static_cast<void*>(chunk_.data());

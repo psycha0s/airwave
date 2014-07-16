@@ -29,7 +29,7 @@ DataPort::~DataPort()
 bool DataPort::create(size_t frameSize)
 {
 	if(!isNull()) {
-		LOG("Unable to create, port is already created.");
+		LOG("Unable to create, port is already created");
 		return false;
 	}
 
@@ -37,13 +37,13 @@ bool DataPort::create(size_t frameSize)
 
 	id_ = shmget(IPC_PRIVATE, bufferSize, S_IRUSR | S_IWUSR);
 	if(id_ < 0) {
-		LOG("Unable to allocate %d bytes of shared memory.", bufferSize);
+		LOG("Unable to allocate %d bytes of shared memory", bufferSize);
 		return false;
 	}
 
 	buffer_ = shmat(id_, nullptr, 0);
 	if(buffer_ == reinterpret_cast<void*>(-1)) {
-		LOG("Unable to attach shared memory segment with id %d.", id_);
+		LOG("Unable to attach shared memory segment with id %d", id_);
 		shmctl(id_, IPC_RMID, nullptr);
 		id_ = -1;
 		return false;
@@ -61,19 +61,19 @@ bool DataPort::create(size_t frameSize)
 bool DataPort::connect(int id)
 {
 	if(!isNull()) {
-		LOG("Unable to connect on already initialized port.");
+		LOG("Unable to connect on already initialized port");
 		return false;
 	}
 
 	buffer_ = shmat(id, nullptr, 0);
 	if(buffer_ == reinterpret_cast<void*>(-1)) {
-		LOG("Unable to attach shared memory segment with id %d.", id);
+		LOG("Unable to attach shared memory segment with id %d", id);
 		return false;
 	}
 
 	shmid_ds info;
 	if(shmctl(id, IPC_STAT, &info) != 0) {
-		LOG("Unable to get info about shared memory segment with id %d.", id);
+		LOG("Unable to get info about shared memory segment with id %d", id);
 		shmdt(buffer_);
 		id_ = -1;
 		return false;
@@ -116,7 +116,7 @@ bool DataPort::isConnected() const
 	shmid_ds info;
 
 	if(shmctl(id_, IPC_STAT, &info) != 0) {
-		LOG("Unable to get info about shared memory segment with id %d.", id_);
+		LOG("Unable to get info about shared memory segment with id %d", id_);
 		return false;
 	}
 

@@ -23,7 +23,7 @@ SlaveUnit::SlaveUnit() :
 SlaveUnit::~SlaveUnit()
 {
 	if(isInitialized_) {
-		LOG("Waiting for audio thread termination.");
+		LOG("Waiting for audio thread termination...");
 
 		runAudio_.clear();
 		WaitForSingleObject(audioThread_, INFINITE);
@@ -38,7 +38,7 @@ SlaveUnit::~SlaveUnit()
 bool SlaveUnit::initialize(const char* fileName, int portId)
 {
 	if(isInitialized_) {
-		LOG("Slave unit is already initialized.");
+		LOG("Slave unit is already initialized");
 		return false;
 	}
 
@@ -56,22 +56,22 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 				GetProcAddress(module_, "main"));
 
 		if(!vstMainProc) {
-			LOG("The '%s' is not a VST plugin.");
+			LOG("The %s is not a VST plugin");
 			FreeLibrary(module_);
 			return false;
 		}
 	}
 
 	if(!controlPort_.connect(portId)) {
-		LOG("Unable to connect control port (id = %d).", portId);
+		LOG("Unable to connect control port (id = %d)", portId);
 		FreeLibrary(module_);
 		return false;
 	}
 
-	LOG("Waiting for master unit request..");
+	LOG("Waiting for master unit request...");
 
 	if(!controlPort_.waitRequest(3000)) {
-		LOG("Unable to get initial request from master unit.");
+		LOG("Unable to get initial request from master unit");
 		controlPort_.disconnect();
 		FreeLibrary(module_);
 		return false;
@@ -83,14 +83,14 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 		frame->value = PROTOCOL_VERSION;
 		controlPort_.sendResponse();
 
-		LOG("Master unit has incompatible protocol version: %d.", frame->value);
+		LOG("Master unit has incompatible protocol version: %d", frame->value);
 		controlPort_.disconnect();
 		FreeLibrary(module_);
 		return false;
 	}
 
 	if(!callbackPort_.connect(frame->opcode)) {
-		LOG("Unable to connect callback port (id = %d).", frame->opcode);
+		LOG("Unable to connect callback port (id = %d)", frame->opcode);
 		controlPort_.disconnect();
 		FreeLibrary(module_);
 		return false;
@@ -106,7 +106,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 
 	effect_ = vstMainProc(audioMasterProc);
 	if(!effect_) {
-		LOG("Unable to initialize VST plugin.");
+		LOG("Unable to initialize VST plugin");
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
 		FreeLibrary(module_);
@@ -314,7 +314,7 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 
 		audioPort_.disconnect();
 		if(!audioPort_.connect(frame->index)) {
-			LOG("Unable to connect audio port.");
+			LOG("Unable to connect audio port");
 			return false;
 		}
 
@@ -620,12 +620,12 @@ intptr_t SlaveUnit::audioMasterProc(AEffect* effect, int32_t opcode,
 
 DWORD CALLBACK SlaveUnit::audioThreadProc(void* param)
 {
-	LOG("Audio thread started.");
+	LOG("Audio thread started");
 
 	SlaveUnit* slaveUnit = static_cast<SlaveUnit*>(param);
 	slaveUnit->audioThread();
 
-	LOG("Audio thread terminated.");
+	LOG("Audio thread terminated");
 	return 0;
 }
 
@@ -636,7 +636,7 @@ LRESULT CALLBACK SlaveUnit::windowProc(HWND hwnd, UINT message,
 	if(hwnd == self_->hwnd_) {
 		switch(message) {
 		case WM_CLOSE:
-			LOG("Received WM_CLOSE event.");
+			LOG("Received WM_CLOSE event");
 			ShowWindow(hwnd, SW_HIDE);
 			return 0;
 		}

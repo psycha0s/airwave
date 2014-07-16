@@ -30,7 +30,7 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 	LOG("Main thread id: %p", mainThreadId_);
 
 	// FIXME: frame size should be verified.
-	if(!controlPort_.create(1024)) {
+	if(!controlPort_.create(10240)) {
 		LOG("Unable to create control port.");
 		return;
 	}
@@ -232,8 +232,8 @@ intptr_t MasterUnit::handleAudioMaster()
 	case audioMasterProcessEvents: {
 		LOG("kAudioMasterProcessEvents");
 		VstEvent* events = reinterpret_cast<VstEvent*>(frame->data);
-		lastEvents_.reload(frame->index, events);
-		VstEvents* e = lastEvents_.events();
+		events_.reload(frame->index, events);
+		VstEvents* e = events_.events();
 
 		return masterProc_(&effect_, frame->opcode, 0, 0, e, 0.0f); }
 	}
@@ -460,11 +460,84 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 		port->waitResponse();
 		return frame->value; }
 
-//	case effGetChunk:
-//		return frame->value;
+	case effGetChunk: {
+		// Tell the slave unit our block size.
+		ptrdiff_t blockSize = port->frameSize() - sizeof(DataFrame);
+		frame->value = blockSize;
 
-//	case effSetChunk:
-//		return frame->value;
+		port->sendRequest();
+		port->waitResponse();
+
+		// If VST plugin supports the effGetChunk event, it has placed first
+		// data block (or even the entire chunk) in the frame buffer.
+		size_t chunkSize = frame->value;
+		size_t count = frame->index;
+
+		if(chunkSize == 0 || count == 0) {
+			LOG("effGetChunk is unsupported by the VST plugin.");
+			return 0;
+		}
+
+		LOG("effGetChunk: %d bytes to transmit.", chunkSize);
+		chunk_.resize(chunkSize);
+
+		auto it = chunk_.begin();
+		it = std::copy(frame->data, frame->data + count, it);
+
+		while(it != chunk_.end()) {
+			frame->command = Command::GetDataBlock;
+			frame->index = std::min(blockSize, chunk_.end() - it);
+
+			LOG("effGetChunk: requiesting next %d bytes..", frame->index);
+
+			port->sendRequest();
+			port->waitResponse();
+
+			size_t count = frame->index;
+			if(count == 0) {
+				LOG("effGetChunk: premature end of data transmission.");
+				return 0;
+			}
+
+			it = std::copy(frame->data, frame->data + count, it);
+		}
+
+		LOG("effGetChunk: the chunk is received successfully.");
+
+		void** chunk = static_cast<void**>(ptr);
+		*chunk = static_cast<void*>(chunk_.data());
+		return chunkSize; }
+
+	case effSetChunk: {
+		LOG("effSetChunk: %d", frame->value);
+
+		bool isPreset = frame->index;
+		data_ = static_cast<uint8_t*>(ptr);
+		dataLength_ = frame->value;
+		size_t blockSize = port->frameSize() - sizeof(DataFrame);
+
+		while(dataLength_) {
+			frame->command = Command::SetDataBlock;
+			size_t count = std::min(blockSize, dataLength_);
+			frame->index = count;
+
+			LOG("effSetChunk: sending next %d bytes..", count);
+
+			port->sendRequest();
+			port->waitResponse();
+
+			data_ += count;
+			dataLength_ -= count;
+		}
+
+		frame->command = Command::Dispatch;
+		frame->opcode = effSetChunk;
+		frame->index = isPreset;
+
+		port->sendRequest();
+		port->waitResponse();
+
+		return frame->value; }
 	}
 
 	LOG("Unhandled dispatch event: %s", kDispatchEvents[opcode]);

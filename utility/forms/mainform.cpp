@@ -120,6 +120,11 @@ MainForm::MainForm(QWidget* parent) :
 			ui_->logView,
 			SLOT(addMessage(quint64,QString,QString)));
 
+	connect(ui_->addSeparatorButton,
+			SIGNAL(clicked()),
+			ui_->logView,
+			SLOT(addSeparator()));
+
 	connect(ui_->clearMessagesButton,
 			SIGNAL(clicked()),
 			ui_->logView,

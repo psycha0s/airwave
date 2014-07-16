@@ -5,6 +5,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <vector>
 #include <X11/Xlib.h>
 #include "common/dataport.h"
 #include "common/eventsignal.h"
@@ -32,7 +33,11 @@ private:
 	AudioMasterProc masterProc_;
 	AEffect effect_;
 	ERect rect_;
-	VstEventKeeper lastEvents_;
+	VstEventKeeper events_;
+
+	uint8_t* data_;
+	size_t dataLength_;
+	std::vector<uint8_t> chunk_;
 
 	RecursiveMutex guard_;
 	RecursiveMutex audioGuard_;

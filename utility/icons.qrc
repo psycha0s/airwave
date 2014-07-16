@@ -11,5 +11,6 @@
         <file>icons/clear.png</file>
         <file>icons/bug.png</file>
         <file>icons/word-wrap.png</file>
+        <file>icons/add-separator.png</file>
     </qresource>
 </RCC>

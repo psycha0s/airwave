@@ -1,5 +1,6 @@
-#include <cstdint>
 #include "vsteventkeeper.h"
+
+#include <cstdint>
 
 
 namespace Airwave {

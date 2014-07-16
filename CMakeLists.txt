@@ -28,7 +28,7 @@ set(HOST_PATH ${CMAKE_INSTALL_PREFIX}/bin/
 	CACHE PATH "Path to the host binary.")
 
 # Configure logger
-option(ENABLE_LOGGER "Enable sending log message to the airwave-utility." ON)
+option(ENABLE_LOGGER "Enable sending log messages to the airwave-utility." ON)
 
 set(LOG_SOCKET_PATH "/tmp/${PROJECT_NAME}.sock"
 	CACHE PATH "Path to the log socket.")

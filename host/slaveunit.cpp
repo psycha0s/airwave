@@ -158,6 +158,14 @@ bool SlaveUnit::processRequest()
 		handleSetParameter();
 		break;
 
+	case Command::GetDataBlock:
+		handleGetDataBlock(frame);
+		break;
+
+	case Command::SetDataBlock:
+		handleSetDataBlock(frame);
+		break;
+
 	case Command::ShowWindow: {
 		if(hwnd_) {
 			ShowWindow(hwnd_, SW_SHOW);
@@ -235,6 +243,21 @@ void SlaveUnit::audioThread()
 			audioPort_.sendResponse();
 		}
 	}
+}
+
+
+void SlaveUnit::handleGetDataBlock(DataFrame* frame)
+{
+	size_t blockSize = frame->index;
+	frame->index = dataLength_ < blockSize ? dataLength_ : blockSize;
+	data_ = std::copy(data_, data_ + frame->index, frame->data);
+	dataLength_ -= frame->index;
+}
+
+
+void SlaveUnit::handleSetDataBlock(DataFrame* frame)
+{
+	chunk_.insert(chunk_.end(), frame->data, frame->data + frame->index);
 }
 
 
@@ -383,11 +406,37 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 
 	case effProcessEvents: {
 		VstEvent* events = reinterpret_cast<VstEvent*>(frame->data);
-		lastEvents_.reload(frame->index, events);
-		VstEvents* e = lastEvents_.events();
+		events_.reload(frame->index, events);
+		VstEvents* e = events_.events();
 
 		frame->value = effect_->dispatcher(effect_, frame->opcode, 0,
 				frame->value, e, frame->opt);
+		break; }
+
+	case effGetChunk: {
+		size_t blockSize = frame->value;
+
+		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
+				0, &data_, frame->opt);
+
+		dataLength_ = frame->value;
+
+		LOG("effGetChunk: %d", dataLength_);
+		if(dataLength_ == 0)
+			break;
+
+		frame->index = dataLength_ < blockSize ? dataLength_ : blockSize;
+		data_ = std::copy(data_, data_ + frame->index, frame->data);
+		dataLength_ -= frame->index;
+
+		break; }
+
+	case effSetChunk: {
+		LOG("effSetChunk: %d", chunk_.size());
+		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
+				chunk_.size(), chunk_.data(), frame->opt);
+
+		chunk_.clear();
 		break; }
 
 	default:

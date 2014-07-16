@@ -17,6 +17,8 @@ enum class Command {
 	HostInfo,
 	PluginInfo,
 	ShowWindow,
+	GetDataBlock,
+	SetDataBlock,
 	AudioMaster
 };
 

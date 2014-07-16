@@ -1,6 +1,7 @@
 #include <QScrollBar>
 #include <QStringBuilder>
 #include <QTime>
+#include "config.h"
 #include "logview.h"
 
 
@@ -53,7 +54,12 @@ void LogView::addMessage(quint64 time, const QString& sender,
 	insertPlainText(QString::number(time & 0xFFFFFFFF).rightJustified(9, '0'));
 	insertPlainText(" ");
 
-	setTextColor(QColor(0x008000));
+	if(sender == HOST_BASENAME || sender.endsWith(".dll")) {
+		setTextColor(QColor(0xA0A000));
+	}
+	else {
+		setTextColor(QColor(0x008000));
+	}
 	insertPlainText(sender.rightJustified(20, ' ', true));
 
 	setTextColor(Qt::black);

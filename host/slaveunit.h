@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <string>
+#include <vector>
 #include <wine/windows/windows.h>
 #include "config.h"
 #include "common/dataport.h"
@@ -31,7 +32,11 @@ private:
 	HWND hwnd_;
 	AEffect* effect_;
 	VstTimeInfo timeInfo_;
-	VstEventKeeper lastEvents_;
+	VstEventKeeper events_;
+
+	uint8_t* data_;
+	size_t dataLength_;
+	std::vector<uint8_t> chunk_;
 
 	DataPort controlPort_;
 	DataPort callbackPort_;
@@ -51,6 +56,9 @@ private:
 	void destroyEditorWindow();
 
 	void audioThread();
+
+	void handleGetDataBlock(DataFrame* frame);
+	void handleSetDataBlock(DataFrame* frame);
 
 	bool handleDispatch(DataFrame* frame);
 	void handleGetParameter();

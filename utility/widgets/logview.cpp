@@ -48,23 +48,24 @@ void LogView::setWordWrap(bool enabled)
 void LogView::addMessage(quint64 time, const QString& sender,
 		const QString& text)
 {
-	setTextColor(QColor(0x808080));
+	setTextColor(QColor(0x909090));
 	insertPlainText(QString::number(time >> 32));
 	insertPlainText(".");
 	insertPlainText(QString::number(time & 0xFFFFFFFF).rightJustified(9, '0'));
 	insertPlainText(" ");
 
 	if(sender == HOST_BASENAME || sender.endsWith(".dll")) {
-		setTextColor(QColor(0xA0A000));
+		setTextColor(QColor(0x804000));
 	}
 	else {
-		setTextColor(QColor(0x008000));
+		setTextColor(QColor(0x004080));
 	}
+
 	insertPlainText(sender.rightJustified(20, ' ', true));
 
-	setTextColor(Qt::black);
 	insertPlainText(" : ");
 
+	setTextColor(0x222222);
 	insertPlainText(text);
 	insertPlainText("\n");
 

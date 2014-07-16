@@ -76,7 +76,11 @@ MainForm::MainForm(QWidget* parent) :
 
 
 	targetModel_->setNameFilters(QStringList() << "*.so");
-	targetModel_->setDir(QDir::homePath());
+	QString vstDirPath = qgetenv("VST_PATH");
+	if(vstDirPath.isEmpty())
+		vstDirPath = QDir::homePath();
+
+	targetModel_->setDir(vstDirPath);
 
 	ui_->bridgesView->setModel(targetModel_);
 	ui_->bridgesView->setRootIsDecorated(false);

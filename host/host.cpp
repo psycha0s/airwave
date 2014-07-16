@@ -14,7 +14,7 @@ int main(int argc, const char* argv[])
 	LOG("Starting Airwave slave unit %s", PROJECT_VERSION);
 
 	if(argc != 3) {
-		LOG("Usage: %s <VST plugin path> <control port id>", argv[0]);
+		LOG("Wrong number of arguments: %d", argc);
 		loggerFree();
 		return -1;
 	}
@@ -28,7 +28,7 @@ int main(int argc, const char* argv[])
 		return -2;
 	}
 
-	LOG("Slave unit initialized, starting to process events");
+	LOG("Slave unit initialized");
 
 	while(slaveUnit->processRequest()) {
 		MSG message;

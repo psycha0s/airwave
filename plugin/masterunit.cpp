@@ -51,13 +51,13 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 		return;
 	}
 	else if(childPid_ == 0) {
-//		setenv("WINELOADER", "/opt/wine-compholio/bin/wine", true);
 		const char* wineLoader = getenv("WINELOADER");
+
 		if(wineLoader) {
 			LOG("WINELOADER: %s", wineLoader);
 		}
 		else {
-			LOG("WINELOADER is not set, using wine from PATH");
+			LOG("WINELOADER is not set, using wine from the PATH");
 		}
 
 		std::string id = std::to_string(controlPort_.id());
@@ -66,7 +66,7 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 				id.c_str(), nullptr);
 
 		// We should never reach this point on success child execution.
-		LOG("execl() call failed.");
+		LOG("execl() call failed");
 		return;
 	}
 
@@ -131,13 +131,13 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 	effect_.version                = info->version;
 
 	LOG("VST plugin summary:");
-	LOG("flags:         0x%08X", effect_.flags);
-	LOG("program count: %d",     effect_.numPrograms);
-	LOG("param count:   %d",     effect_.numParams);
-	LOG("input count:   %d",     effect_.numInputs);
-	LOG("output count:  %d",     effect_.numOutputs);
-	LOG("unique ID:     0x%08X", effect_.uniqueID);
-	LOG("version:       %d",     effect_.version);
+	LOG("  flags:         0x%08X", effect_.flags);
+	LOG("  program count: %d",     effect_.numPrograms);
+	LOG("  param count:   %d",     effect_.numParams);
+	LOG("  input count:   %d",     effect_.numInputs);
+	LOG("  output count:  %d",     effect_.numOutputs);
+	LOG("  unique ID:     0x%08X", effect_.uniqueID);
+	LOG("  version:       %d",     effect_.version);
 }
 
 

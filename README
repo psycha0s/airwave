@@ -6,8 +6,6 @@ to exchange data. Due to this only one extra copying is made for each data
 transfer. Airwave also uses the XEMBED protocol to embed the plugin
 editor into the host window.
 
-Currently, only the 32-bit VST plugins are supported, but this is due to lack of
-time for testing the 64-bit code, and not due to the technical difficulties.
 It is the initial version that has many things, which are not implemented yet
 and of course it can contain a lot of bugs. However, it allows to work good
 enough with many VST plugins.
@@ -18,17 +16,16 @@ Tested VST hosts:
 
 Tested VST plugins:
 - Synth1 by Ichiro Toda - works good
+- Image-Line Harmless - works good
 - u-he Zebra2 (demo) - works good
 - u-he Diva (demo) - has some sound glitches due to the cpu load, needs to debug
 - u-he ACE (demo) - works, only the few basic tests were made
-- ReFX Vanguard - works good, has some drawing issues
+- ReFX Vanguard - works good, has some little redrawing issues
 - Native Instruments FM8 (demo) - works, only the few basic tests were made
 
 Known issues:
 - There is some hack for embedding the editor window. You have a chance to get
   the black window instead of plugin editor ;-)
-- Handling of the effGetChunk/effSetChunk events is not implemented. Bank/preset
-  load/save operations may not work.
 
 1. Requirements
 - WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
@@ -90,10 +87,10 @@ the real VST plugin.
 4. How to use it?
 Use the airwave-utility for create links to VST dlls. To do this, select the VST
 dll file in the left view, then in the right view go to the directory, where you
-want to place your link file, and then press the "create link" button. Remember,
-you can link only 32-bit dlls at this time. After link is created, you cannot
-just move created link files to other directories manually, as the configuration
-file should be updated accordingly. So it is easier to do all link management
-with the help of the airwave-utility application. Also note, that after updating
-the airwave to the newer version, all your link files should be recreated. You
-can do this in airwave-utility by clicking on the "recreate links" button.
+want to place your link file, and then press the "create link" button. After
+link is created, you cannot just move created link files to other directories
+manually, as the configuration file should be updated accordingly. So it is
+easier to do all link management with the help of the airwave-utility
+application. Also note, that after updating the airwave to the newer version,
+all your link files should be recreated. You can do this in airwave-utility by
+clicking on the "recreate all links" button.

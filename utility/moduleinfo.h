@@ -1,8 +1,10 @@
 #ifndef UTILITY_MODULEINFO_H
 #define UTILITY_MODULEINFO_H
 
-#include <QString>
 #include <magic.h>
+
+
+class QString;
 
 
 class ModuleInfo {
@@ -12,7 +14,6 @@ public:
 		kArch32      = 32,
 		kArch64      = 64
 	};
-
 
 	static ModuleInfo* instance();
 

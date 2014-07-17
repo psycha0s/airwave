@@ -3,7 +3,6 @@
 
 #include <string>
 #include "config.h"
-#include "types.h"
 
 
 #ifdef ENABLE_LOGGER

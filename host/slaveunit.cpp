@@ -14,9 +14,12 @@ SlaveUnit* SlaveUnit::self_ = nullptr;
 SlaveUnit::SlaveUnit() :
 	isInitialized_(false),
 	hwnd_(0),
+	data_(nullptr),
+	dataLength_(0),
 	runAudio_(ATOMIC_FLAG_INIT),
 	isEditorOpen_(false)
 {
+	LOG("Main thread id: %p", GetCurrentThreadId());
 }
 
 
@@ -249,6 +252,7 @@ void SlaveUnit::audioThread()
 void SlaveUnit::handleGetDataBlock(DataFrame* frame)
 {
 	size_t blockSize = frame->index;
+	LOG("handleGetDataBlock: %d bytes", blockSize);
 	frame->index = dataLength_ < blockSize ? dataLength_ : blockSize;
 	data_ = std::copy(data_, data_ + frame->index, frame->data);
 	dataLength_ -= frame->index;
@@ -416,10 +420,16 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 		break; }
 
 	case effGetChunk: {
+		LOG("(%p) effGetChunk: index=%d, data_=%p", GetCurrentThreadId(),
+				frame->index, data_);
+
 		size_t blockSize = frame->value;
 
-		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
-				0, &data_, frame->opt);
+		frame->value = effect_->dispatcher(effect_, effGetChunk, frame->index,
+				0, &data_, 0.0f);
+
+//		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
+//				0, &data_, frame->opt);
 
 		dataLength_ = frame->value;
 
@@ -504,10 +514,9 @@ void SlaveUnit::handleProcessDouble()
 intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 		intptr_t value, void* ptr, float opt)
 {
-//	if(opcode != audioMasterGetTime) { // filter out audioMasterGetTime
-//		LOG("audioMaster(opcode: %s, index: %d, value: %d, ptr: %p, opt: %g)",
-//			kAudioMasterEvents[opcode], index, value, ptr, opt);
-//	}
+/*	if(opcode != audioMasterGetTime && opcode != audioMasterIdle) {
+		LOG("handleAudioMaster(%s)", kAudioMasterEvents[opcode]);
+	}*/
 
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 	frame->command = Command::AudioMaster;
@@ -522,7 +531,7 @@ intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 	case audioMasterAutomate:
 	case audioMasterBeginEdit:
 	case audioMasterEndEdit:
-	case audioMasterUpdateDisplay:
+//	case audioMasterUpdateDisplay:
 	case audioMasterGetVendorVersion:
 	case audioMasterIOChanged:
 	case audioMasterSizeWindow:

@@ -19,6 +19,8 @@ namespace Airwave {
 MasterUnit::MasterUnit(const std::string& pluginPath,
 		const std::string& hostPath, AudioMasterProc masterProc) :
 	masterProc_(masterProc),
+	data_(nullptr),
+	dataLength_(0),
 	childPid_(-1),
 	processCallbacks_(ATOMIC_FLAG_INIT),
 	mainThreadId_(std::this_thread::get_id())
@@ -193,9 +195,10 @@ intptr_t MasterUnit::handleAudioMaster()
 {
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 
-/*	if(frame->opcode != kAudioMasterGetTime) { // filter out audioMasterGetTime
+/*	if(frame->opcode != audioMasterGetTime &&
+			frame->opcode != audioMasterIdle) {
 		LOG("(%p) handleAudioMaster(opcode: %s, index: %d, value: %d, opt: %g)",
-				std::this_thread::get_id(), kAudioMasterOpcodes[frame->opcode],
+				std::this_thread::get_id(), kAudioMasterEvents[frame->opcode],
 				frame->index, frame->value, frame->opt);
 	}*/
 
@@ -477,6 +480,9 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 		port->sendRequest();
 		port->waitResponse();
 
+		LOG("effGetChunk: chunk size %d bytes", frame->value);
+
+
 		// If VST plugin supports the effGetChunk event, it has placed first
 		// data block (or even the entire chunk) in the frame buffer.
 		size_t chunkSize = frame->value;
@@ -495,6 +501,8 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 		while(it != chunk_.end()) {
 			frame->command = Command::GetDataBlock;
 			frame->index = std::min(blockSize, chunk_.end() - it);
+
+			LOG("effSetChunk: requesting next %d bytes", frame->index);
 
 			port->sendRequest();
 			port->waitResponse();
@@ -528,12 +536,15 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 			frame->index = count;
 			std::memcpy(frame->data, data_, count);
 
+//			LOG("effSetChunk: sending next %d bytes", count);
+
 			port->sendRequest();
 			port->waitResponse();
 
 			data_ += count;
 			dataLength_ -= count;
 		}
+
 
 		frame->command = Command::Dispatch;
 		frame->opcode = effSetChunk;

@@ -35,6 +35,8 @@ bool LogSocket::listen(const QString& id)
 		return false;
 	}
 
+	unlink(id.toAscii().constData());
+
 	struct sockaddr_un address;
 	std::memset(&address, 0, sizeof(address));
 

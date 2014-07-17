@@ -44,6 +44,12 @@ configure_file(
 	${CMAKE_CURRENT_BINARY_DIR}/config.h
 )
 
+# Check operationg system
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message(FATAL_ERROR "This project can be build on the GNU/Linux only.")
+endif()
+
+
 # Check build type and offer user to set concrete one
 if(NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE RelWithDebInfo)

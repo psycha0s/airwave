@@ -26,24 +26,27 @@ ModuleInfo::~ModuleInfo()
 }
 
 
-bool ModuleInfo::isInitialized() const
+ModuleInfo* ModuleInfo::instance()
 {
-	return isInitialized_;
+	static ModuleInfo info;
+	return &info;
 }
 
 
 ModuleInfo::Arch ModuleInfo::getArch(const QString& fileName) const
 {
-	const char* buffer = magic_file(magic_, fileName.toAscii().data());
+	if(isInitialized_) {
+		const char* buffer = magic_file(magic_, fileName.toAscii().data());
 
-	if(buffer) {
-		QString string = buffer;
+		if(buffer) {
+			QString string = buffer;
 
-		if(string.indexOf("80386") != -1) {
-			return kArch32;
-		}
-		else if(string.indexOf("x86-64") != -1) {
-			return kArch64;
+			if(string.indexOf("80386") != -1) {
+				return kArch32;
+			}
+			else if(string.indexOf("x86-64") != -1) {
+				return kArch64;
+			}
 		}
 	}
 

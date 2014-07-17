@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include "config.h"
 #include "linkeditdialog.h"
+#include "moduleinfo.h"
 #include "ui_mainform.h"
 #include "widgets/nofocusdelegate.h"
 
@@ -152,6 +153,24 @@ MainForm::~MainForm()
 }
 
 
+QString MainForm::libraryPathFor(const QString& pluginPath) const
+{
+	QString libraryPath = PLUGIN_PATH "/" PLUGIN_BASENAME;
+
+	ModuleInfo* moduleInfo = ModuleInfo::instance();
+	ModuleInfo::Arch arch = moduleInfo->getArch(pluginPath);
+
+	if(arch == ModuleInfo::kArch32) {
+		return libraryPath + "-32.so";
+	}
+	else if(arch == ModuleInfo::kArch64) {
+		return libraryPath + "-64.so";
+	}
+
+	return QString();
+}
+
+
 void MainForm::onShowHiddenButtonToggled(bool value)
 {
 	sourceModel_->setShowHidden(value);
@@ -250,10 +269,16 @@ void MainForm::onCreateLinkButtonClicked()
 
 	pluginPath = sourceModel_->rootItem()->childAt(row)->fullPath();
 
-	QString libraryPath = PLUGIN_PATH "/" PLUGIN_BASENAME "-32.so";
+	QString libraryPath = libraryPathFor(pluginPath);
+	if(libraryPath.isEmpty()) {
+		QString message = "Unable to determine architecture of " + pluginPath;
+		QMessageBox::critical(this, tr("Error"), tr(message.toAscii()));
+		return;
+	}
+
 	if(!QFile::exists(libraryPath)) {
-		QString message = tr("Unable to find airwave template plugin.");
-		QMessageBox::critical(this, tr("Error"), message);
+		QString message = "Unable to find airwave template: " + libraryPath;
+		QMessageBox::critical(this, tr("Error"), tr(message.toAscii()));
 		return;
 	}
 
@@ -263,13 +288,7 @@ void MainForm::onCreateLinkButtonClicked()
 		QString fileName = dialog.linkName() + ".so";
 
 		QFile::copy(libraryPath, bridgePath + fileName);
-		if(!linksModel_->setLink(pluginPath, bridgePath + fileName)) {
-			QFile file(bridgePath + fileName);
-			file.remove();
-			QString message = tr("The dll file has uncompatible architecture.");
-			QMessageBox::critical(this, tr("Error"), message);
-			return;
-		}
+		linksModel_->setLink(pluginPath, bridgePath + fileName);
 	}
 }
 
@@ -317,17 +336,26 @@ void MainForm::onRemoveLinkButtonClicked()
 
 void MainForm::onRecreateLinksButtonClicked()
 {
-	QString libraryPath = PLUGIN_PATH "/" PLUGIN_BASENAME "-32.so";
-	if(!QFile::exists(libraryPath)) {
-		QString message = tr("Unable to find airwave template plugin.");
-		QMessageBox::critical(this, tr("Error"), message);
-		return;
-	}
-
 	LinkItem* item = linksModel_->rootItem()->firstChild();
+
 	while(item) {
 		QFile bridgeFile(item->bridgePath());
-		if(bridgeFile.exists() && item->bridgePath() != libraryPath)
+
+		QString plugin = item->pluginPath();
+		QString libraryPath = libraryPathFor(plugin);
+		if(libraryPath.isEmpty()) {
+			QString message = "Unable to determine architecture of " + plugin;
+			QMessageBox::critical(this, tr("Error"), tr(message.toAscii()));
+			return;
+		}
+
+		if(!QFile::exists(libraryPath)) {
+			QString message = "Unable to find airwave template: " + libraryPath;
+			QMessageBox::critical(this, tr("Error"), tr(message.toAscii()));
+			return;
+		}
+
+		if(bridgeFile.exists())
 			bridgeFile.remove();
 
 		QFile::copy(libraryPath, item->bridgePath());

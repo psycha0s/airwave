@@ -3,10 +3,6 @@ cmake_minimum_required(VERSION 2.8.6)
 set(TARGET_NAME ${HOST_BASENAME})
 
 
-set(FIND_LIBRARY_USE_LIB64_PATHS OFF)
-find_package(Threads REQUIRED)
-
-
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -33,6 +29,35 @@ set(SOURCES
 	slaveunit.cpp
 )
 
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	# Search for 64-bit packages
+	find_package(Threads REQUIRED)
+
+	# Set target
+	add_executable(${TARGET_NAME}-64 WIN32 ${SOURCES})
+
+	set_target_properties(${TARGET_NAME}-64 PROPERTIES
+		COMPILE_FLAGS "-m64"
+		LINK_FLAGS "-m64"
+	)
+
+	# Link with libraries
+	target_link_libraries(${TARGET_NAME}-64 ${CMAKE_THREAD_LIBS_INIT})
+
+
+	install(PROGRAMS
+		${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-64.exe
+		${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-64.exe.so
+		DESTINATION bin
+	)
+
+endif()
+
+
+# Search for 32-bit packages
+set(FIND_LIBRARY_USE_LIB64_PATHS OFF)
+find_package(Threads REQUIRED)
 
 # Set target
 add_executable(${TARGET_NAME}-32 WIN32 ${SOURCES})

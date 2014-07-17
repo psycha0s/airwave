@@ -1,5 +1,7 @@
 #include "linksmodel.h"
 
+#include "moduleinfo.h"
+
 
 using Airwave::LinkManager;
 
@@ -90,12 +92,6 @@ QVariant LinksModel::headerData(int section, Qt::Orientation orientation,
 
 bool LinksModel::setLink(const QString& pluginPath, const QString& bridgePath)
 {
-	ModuleInfo::Arch bridgeArch = info_.getArch(bridgePath);
-	ModuleInfo::Arch pluginArch = info_.getArch(pluginPath);
-
-	if(bridgeArch != pluginArch || bridgeArch == ModuleInfo::kArchUnknown)
-		return false;
-
 	linkManager_.bind(bridgePath.toStdString(), pluginPath.toStdString());
 	reload();
 	return true;
@@ -130,8 +126,11 @@ void LinksModel::reload()
 
 	for(const std::string& bridgePath : linkManager_.boundBridges()) {
 		std::string pluginPath = linkManager_.pluginPath(bridgePath);
-		ModuleInfo::Arch arch = info_.getArch(bridgePath.c_str());
+
 		QString architecture;
+		ModuleInfo* moduleInfo = ModuleInfo::instance();
+		ModuleInfo::Arch arch = moduleInfo->getArch(bridgePath.c_str());
+
 		if(arch == ModuleInfo::kArch32) {
 			architecture = tr("32-bit");
 		}

@@ -27,6 +27,8 @@ private:
 
 	LogSocket logSocket_;
 
+	QString libraryPathFor(const QString& pluginPath) const;
+
 private slots:
 	void onShowHiddenButtonToggled(bool value);
 	void onShowLinkedButtonClicked();

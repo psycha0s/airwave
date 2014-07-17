@@ -14,10 +14,12 @@ public:
 	};
 
 
-	ModuleInfo();
-	~ModuleInfo();
+	static ModuleInfo* instance();
 
-	bool isInitialized() const;
+	ModuleInfo(const ModuleInfo&) = delete;
+	ModuleInfo& operator=(const ModuleInfo&) = delete;
+
+	~ModuleInfo();
 
 	Arch getArch(const QString& fileName) const;
 
@@ -25,6 +27,7 @@ private:
 	bool isInitialized_;
 	magic_t magic_;
 
+	ModuleInfo();
 };
 
 

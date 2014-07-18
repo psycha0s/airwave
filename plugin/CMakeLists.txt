@@ -12,6 +12,19 @@ include_directories(
 )
 
 
+# Run cmake with parameter -DREDEFINE_CDECL=OFF for disable redefinition of
+# __cdecl for suppressing compiler warnings. Then the sources will not compile,
+# until you remove __cdecl from aeffect.h header manually. This is intended
+# for development convenience only.
+option(REDEFINE_CDECL "Redefine __cdecl for Steinberg VST SDK code." ON)
+
+if(REDEFINE_CDECL)
+	# Hack for VST SDK.
+	add_definitions(-D__cdecl=)
+endif()
+
+
+
 # Common sources
 set(SOURCES
 	../common/dataport.cpp

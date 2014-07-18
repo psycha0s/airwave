@@ -287,6 +287,12 @@ void MainForm::onCreateLinkButtonClicked()
 	if(dialog.exec()) {
 		QString fileName = dialog.linkName() + ".so";
 
+		if(QFile::exists(bridgePath + fileName)) {
+			QString message = "Link with same name is already present.";
+			QMessageBox::warning(this, tr("Error"), tr(message.toAscii()));
+			return;
+		}
+
 		QFile::copy(libraryPath, bridgePath + fileName);
 		linksModel_->setLink(pluginPath, bridgePath + fileName);
 	}

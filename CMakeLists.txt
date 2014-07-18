@@ -96,6 +96,7 @@ if(REDEFINE_CDECL)
 	add_definitions(-D__cdecl=)
 endif()
 
+add_definitions(-DNOMINMAX)
 
 # Set global include directories
 include_directories(

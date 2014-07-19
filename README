@@ -1,8 +1,7 @@
 Airwave is a WINE-based VST bridge, that allows to use Windows VST 2.4 plugins
 with Linux VST hosts.
 
-A distinctive feature, in comparison with analogues, is the use of shared memory
-to exchange data. Due to this only one extra copying is made for each data
+Due to use of shared memory, only one extra copying is made for each data
 transfer. Airwave also uses the XEMBED protocol to embed the plugin
 editor into the host window.
 
@@ -17,11 +16,12 @@ Tested VST hosts:
 Tested VST plugins:
 - Synth1 by Ichiro Toda - works good
 - Image-Line Harmless - works good
-- u-he Zebra2 (demo) - works good
-- u-he Diva (demo) - has some sound glitches due to the cpu load, needs to debug
-- u-he ACE (demo) - works, only the few basic tests were made
+- Image-Line Sytrus - works good
+- u-he Zebra2 - works good
+- u-he Diva - has some sound glitches due to the high cpu load
+- u-he ACE - works good
 - ReFX Vanguard - works good, has some little redrawing issues
-- Native Instruments FM8 (demo) - works, only the few basic tests were made
+- Native Instruments FM8 - works good
 
 Known issues:
 - There is some hack for embedding the editor window. You have a chance to get
@@ -69,9 +69,9 @@ not just build and left them in place.
 
 3. How does it work?
 The project consist of four components:
-- native VST plugin shared library (airwave-plugin-32.so).
-- winelib VST host binary (airwave-host-32.exe.so and airwave-host-32.exe
-  launcher script).
+- native VST plugin shared library (airwave-plugin-<arch>.so).
+- winelib VST host binary (airwave-host-<arch>.exe.so and
+  airwave-host-<arch>.exe launcher script).
 - configuration file (${XDG_CONFIG_PATH}/airwave/airwave.conf), where all link
   information is stored.
 - GUI configuration utility (airwave-utility).

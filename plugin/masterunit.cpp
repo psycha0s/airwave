@@ -502,7 +502,7 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 			frame->command = Command::GetDataBlock;
 			frame->index = std::min(blockSize, chunk_.end() - it);
 
-			LOG("effSetChunk: requesting next %d bytes", frame->index);
+//			LOG("effSetChunk: requesting next %d bytes", frame->index);
 
 			port->sendRequest();
 			port->waitResponse();

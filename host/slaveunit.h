@@ -69,7 +69,7 @@ private:
 	intptr_t audioMaster(int32_t opcode, int32_t index, intptr_t value,
 			void* ptr, float opt);
 
-	static intptr_t audioMasterProc(AEffect* effect, int32_t opcode,
+	static intptr_t VSTCALLBACK audioMasterProc(AEffect* effect, int32_t opcode,
 			int32_t index, intptr_t value, void* ptr, float opt);
 
 	static DWORD CALLBACK audioThreadProc(void* param);

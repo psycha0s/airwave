@@ -425,11 +425,8 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 
 		size_t blockSize = frame->value;
 
-		frame->value = effect_->dispatcher(effect_, effGetChunk, frame->index,
-				0, &data_, 0.0f);
-
-//		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
-//				0, &data_, frame->opt);
+		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
+				0, &data_, frame->opt);
 
 		dataLength_ = frame->value;
 
@@ -514,9 +511,9 @@ void SlaveUnit::handleProcessDouble()
 intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 		intptr_t value, void* ptr, float opt)
 {
-/*	if(opcode != audioMasterGetTime && opcode != audioMasterIdle) {
-		LOG("handleAudioMaster(%s)", kAudioMasterEvents[opcode]);
-	}*/
+//	if(opcode != audioMasterGetTime && opcode != audioMasterIdle) {
+//		LOG("handleAudioMaster(%s)", kAudioMasterEvents[opcode]);
+//	}
 
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 	frame->command = Command::AudioMaster;
@@ -619,7 +616,7 @@ intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 }
 
 
-intptr_t SlaveUnit::audioMasterProc(AEffect* effect, int32_t opcode,
+intptr_t VSTCALLBACK SlaveUnit::audioMasterProc(AEffect* effect, int32_t opcode,
 		int32_t index, intptr_t value, void* ptr, float opt)
 {
 	UNUSED(effect);

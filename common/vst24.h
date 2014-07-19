@@ -9,10 +9,10 @@
 namespace Airwave {
 
 
-typedef	intptr_t (*AudioMasterProc)(AEffect*, int32_t, int32_t, intptr_t,
-		void*, float);
+typedef	intptr_t (VSTCALLBACK *AudioMasterProc)(AEffect*, int32_t, int32_t,
+		intptr_t, void*, float);
 
-typedef AEffect* (*VstPluginMainProc)(AudioMasterProc);
+typedef AEffect* (VSTCALLBACK *VstPluginMainProc)(AudioMasterProc);
 
 
 static const char* const kDispatchEvents[] = {

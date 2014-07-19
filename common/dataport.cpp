@@ -138,7 +138,7 @@ size_t DataPort::frameSize() const
 
 void* DataPort::frameBuffer()
 {
-	return controlBlock() + sizeof(ControlBlock);
+	return controlBlock() + 1;
 }
 
 

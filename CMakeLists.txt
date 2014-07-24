@@ -37,6 +37,9 @@ set(LOG_SOCKET_PATH "/tmp/${PROJECT_NAME}.sock"
 # GUI utility application.
 option(BUILD_UTILITY "Build the GUI utility (Qt4)." ON)
 
+# An option to disable building of 64-bit version on x86_64
+option(BUILD_64_BIT "Enable building of 64-bit version on x86_64" ON)
+
 
 # Create config.h header
 configure_file(

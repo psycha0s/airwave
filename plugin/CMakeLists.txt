@@ -28,7 +28,7 @@ set(SOURCES
 )
 
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+if(BUILD_64_BIT AND CMAKE_SIZEOF_VOID_P EQUAL 8)
 	# Search for 64-bit packages
 	find_package(LibDl REQUIRED)
 	find_package(Threads REQUIRED)

@@ -127,6 +127,8 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 	effect_.flags                  = info->flags;
 	effect_.numPrograms            = info->programCount;
 	effect_.numParams              = info->paramCount;
+	effect_.numPrograms            = 1;
+	effect_.numParams              = 1;
 	effect_.numInputs              = info->inputCount;
 	effect_.numOutputs             = info->outputCount;
 	effect_.uniqueID               = info->uniqueId;
@@ -195,12 +197,12 @@ intptr_t MasterUnit::handleAudioMaster()
 {
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 
-/*	if(frame->opcode != audioMasterGetTime &&
+	if(frame->opcode != audioMasterGetTime &&
 			frame->opcode != audioMasterIdle) {
 		LOG("(%p) handleAudioMaster(opcode: %s, index: %d, value: %d, opt: %g)",
 				std::this_thread::get_id(), kAudioMasterEvents[frame->opcode],
 				frame->index, frame->value, frame->opt);
-	}*/
+	}
 
 	switch(frame->opcode) {
 	case audioMasterVersion:
@@ -272,7 +274,7 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 	// We will not transmit effEditIdle event because slave unit processes
 	// window events continuously in his main thread.
 	case effEditIdle:
-		return 1;
+//		return 1;
 
 	case effGetVstVersion:
 	case effOpen:
@@ -662,6 +664,13 @@ void MasterUnit::processDoubleReplacing(double** inputs, double** outputs,
 intptr_t MasterUnit::dispatchProc(AEffect* effect, int32_t opcode,
 		int32_t index, intptr_t value, void* ptr, float opt)
 {
+//	if(opcode != effCanBeAutomated && opcode != effGetProgramNameIndexed &&
+//			opcode != effEditIdle && opcode != effGetParamDisplay &&
+//			opcode != effGetParamLabel && opcode != effGetParameterProperties) {
+		LOG("(%p) dispatch: %s", std::this_thread::get_id(),
+			kDispatchEvents[opcode]);
+//	}
+
 	// Most of VST hosts send some dispatch events in separate threads. So, if
 	// the current thread is different than the main thread, we will send this
 	// event through the audio port for processing it inside the dedicated audio

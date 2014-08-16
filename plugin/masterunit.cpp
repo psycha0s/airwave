@@ -90,8 +90,8 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 
 	LOG("Waiting for child response...");
 
-	// Give slave unit the 3 seconds to initialize.
-	if(!controlPort_.waitResponse(3000)) {
+	// Give slave unit the 8 seconds to initialize.
+	if(!controlPort_.waitResponse(8000)) {
 		LOG("Child process is not responding");
 		kill(childPid_, SIGKILL);
 		controlPort_.disconnect();
@@ -127,8 +127,6 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 	effect_.flags                  = info->flags;
 	effect_.numPrograms            = info->programCount;
 	effect_.numParams              = info->paramCount;
-	effect_.numPrograms            = 1;
-	effect_.numParams              = 1;
 	effect_.numInputs              = info->inputCount;
 	effect_.numOutputs             = info->outputCount;
 	effect_.uniqueID               = info->uniqueId;
@@ -197,12 +195,12 @@ intptr_t MasterUnit::handleAudioMaster()
 {
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 
-	if(frame->opcode != audioMasterGetTime &&
-			frame->opcode != audioMasterIdle) {
-		LOG("(%p) handleAudioMaster(opcode: %s, index: %d, value: %d, opt: %g)",
-				std::this_thread::get_id(), kAudioMasterEvents[frame->opcode],
-				frame->index, frame->value, frame->opt);
-	}
+//	if(frame->opcode != audioMasterGetTime &&
+//			frame->opcode != audioMasterIdle) {
+//		LOG("(%p) handleAudioMaster(opcode: %s, index: %d, value: %d, opt: %g)",
+//				std::this_thread::get_id(), kAudioMasterEvents[frame->opcode],
+//				frame->index, frame->value, frame->opt);
+//	}
 
 	switch(frame->opcode) {
 	case audioMasterVersion:

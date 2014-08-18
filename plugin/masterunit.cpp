@@ -90,8 +90,8 @@ MasterUnit::MasterUnit(const std::string& pluginPath,
 
 	LOG("Waiting for child response...");
 
-	// Give slave unit the 8 seconds to initialize.
-	if(!controlPort_.waitResponse(8000)) {
+	// Wait for the slave unit initialization.
+	if(!controlPort_.waitResponse()) {
 		LOG("Child process is not responding");
 		kill(childPid_, SIGKILL);
 		controlPort_.disconnect();

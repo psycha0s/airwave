@@ -1,5 +1,6 @@
 #include "vsteventkeeper.h"
 
+#include <algorithm>
 #include <cstdint>
 
 
@@ -24,13 +25,15 @@ void VstEventKeeper::reload(int count, const VstEvent events[])
 	if(!events_ || events_->numEvents < count) {
 		delete [] events_;
 
-		size_t size = sizeof(VstEvents) + count * (sizeof(VstEvent*) +
-				sizeof(VstEvent));
+		int extraCount = std::max(count - 2, 0);
+
+		size_t size = sizeof(VstEvents) + extraCount * sizeof(VstEvent*) +
+				count * sizeof(VstEvent);
 
 		uint8_t* buffer = new uint8_t[size];
 		events_ = reinterpret_cast<VstEvents*>(buffer);
 
-		size_t offset = sizeof(VstEvents) + count * sizeof(VstEvent*);
+		size_t offset = sizeof(VstEvents) + extraCount * sizeof(VstEvent*);
 		data_ = reinterpret_cast<VstEvent*>(buffer + offset);
 	}
 

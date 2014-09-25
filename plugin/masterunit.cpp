@@ -665,8 +665,8 @@ intptr_t MasterUnit::dispatchProc(AEffect* effect, int32_t opcode,
 //	if(opcode != effCanBeAutomated && opcode != effGetProgramNameIndexed &&
 //			opcode != effEditIdle && opcode != effGetParamDisplay &&
 //			opcode != effGetParamLabel && opcode != effGetParameterProperties) {
-		LOG("(%p) dispatch: %s", std::this_thread::get_id(),
-			kDispatchEvents[opcode]);
+//		LOG("(%p) dispatch: %s", std::this_thread::get_id(),
+//			kDispatchEvents[opcode]);
 //	}
 
 	// Most of VST hosts send some dispatch events in separate threads. So, if

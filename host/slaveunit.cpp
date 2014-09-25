@@ -1,6 +1,7 @@
 #include "slaveunit.h"
 
 #include <cstring>
+#include <wine/windows/winuser.h>
 #include "common/logger.h"
 #include "common/protocol.h"
 
@@ -33,6 +34,7 @@ SlaveUnit::~SlaveUnit()
 
 		destroyEditorWindow();
 
+		CloseHandle(guard_);
 		FreeLibrary(module_);
 	}
 }
@@ -51,6 +53,8 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 		return false;
 	}
 
+	guard_ = CreateMutex(nullptr, false, nullptr);
+
 	VstPluginMainProc vstMainProc = reinterpret_cast<VstPluginMainProc>(
 			GetProcAddress(module_, "VSTPluginMain"));
 
@@ -60,6 +64,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 
 		if(!vstMainProc) {
 			LOG("The %s is not a VST plugin");
+			CloseHandle(guard_);
 			FreeLibrary(module_);
 			return false;
 		}
@@ -67,6 +72,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 
 	if(!controlPort_.connect(portId)) {
 		LOG("Unable to connect control port (id = %d)", portId);
+		CloseHandle(guard_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -76,6 +82,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 	if(!controlPort_.waitRequest(3000)) {
 		LOG("Unable to get initial request from master unit");
 		controlPort_.disconnect();
+		CloseHandle(guard_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -88,6 +95,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 
 		LOG("Master unit has incompatible protocol version: %d", frame->value);
 		controlPort_.disconnect();
+		CloseHandle(guard_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -95,6 +103,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 	if(!callbackPort_.connect(frame->opcode)) {
 		LOG("Unable to connect callback port (id = %d)", frame->opcode);
 		controlPort_.disconnect();
+		CloseHandle(guard_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -112,6 +121,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 		LOG("Unable to initialize VST plugin");
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
+		CloseHandle(guard_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -150,15 +160,21 @@ bool SlaveUnit::processRequest()
 
 	switch(frame->command) {
 	case Command::Dispatch:
+		WaitForSingleObject(guard_, INFINITE);
 		result = handleDispatch(frame);
+		ReleaseMutex(guard_);
 		break;
 
 	case Command::GetParameter:
+//		WaitForSingleObject(guard_, INFINITE);
 		handleGetParameter();
+//		ReleaseMutex(guard_);
 		break;
 
 	case Command::SetParameter:
+//		WaitForSingleObject(guard_, INFINITE);
 		handleSetParameter();
+//		ReleaseMutex(guard_);
 		break;
 
 	case Command::GetDataBlock:
@@ -227,6 +243,9 @@ void SlaveUnit::audioThread()
 
 	while(runAudio_.test_and_set()) {
 		if(audioPort_.waitRequest(50)) {
+
+			WaitForSingleObject(guard_, INFINITE);
+
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
 			if(frame->command == Command::ProcessSingle) {
@@ -241,6 +260,8 @@ void SlaveUnit::audioThread()
 			else {
 				LOG("audioThread() unacceptable command: %d", frame->command);
 			}
+
+			ReleaseMutex(guard_);
 
 			frame->command = Command::Response;
 			audioPort_.sendResponse();
@@ -275,6 +296,9 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 		// the effClose event. This leads to crashes of some stupid plugins. So
 		// we just emulate correct behavior here to avoid these crashes.
 		if(isEditorOpen_) {
+			SetWindowLong(childHwnd_, GWLP_WNDPROC,
+					reinterpret_cast<LONG_PTR>(oldWndProc_));
+
 			effect_->dispatcher(effect_, effEditClose, 0, 0, nullptr, 0.0f);
 			destroyEditorWindow();
 			isEditorOpen_ = false;
@@ -303,6 +327,9 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 		break;
 
 	case effEditClose:
+		SetWindowLong(childHwnd_, GWLP_WNDPROC,
+				reinterpret_cast<LONG_PTR>(oldWndProc_));
+
 		frame->value = effect_->dispatcher(effect_, frame->opcode,
 				frame->index, frame->value, nullptr, frame->opt);
 
@@ -379,6 +406,13 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 
 		HANDLE handle = GetPropA(hwnd_, "__wine_x11_whole_window");
 		frame->value = reinterpret_cast<intptr_t>(handle);
+
+		childHwnd_ = GetWindow(hwnd_, GW_CHILD);
+
+		LONG_PTR result = SetWindowLong(childHwnd_, GWLP_WNDPROC,
+				reinterpret_cast<LONG_PTR>(windowProc));
+
+		oldWndProc_ = reinterpret_cast<WNDPROC>(result);
 
 		isEditorOpen_ = true;
 		break; }
@@ -458,15 +492,23 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 
 void SlaveUnit::handleGetParameter()
 {
+	WaitForSingleObject(guard_, INFINITE);
+
 	DataFrame* frame = controlPort_.frame<DataFrame>();
 	frame->opt = effect_->getParameter(effect_, frame->index);
+
+	ReleaseMutex(guard_);
 }
 
 
 void SlaveUnit::handleSetParameter()
 {
+	WaitForSingleObject(guard_, INFINITE);
+
 	DataFrame* frame = controlPort_.frame<DataFrame>();
 	effect_->setParameter(effect_, frame->index, frame->opt);
+
+	ReleaseMutex(guard_);
 }
 
 
@@ -620,7 +662,12 @@ intptr_t VSTCALLBACK SlaveUnit::audioMasterProc(AEffect* effect, int32_t opcode,
 		int32_t index, intptr_t value, void* ptr, float opt)
 {
 	UNUSED(effect);
-	return self_->audioMaster(opcode, index, value, ptr, opt);
+//	return self_->audioMaster(opcode, index, value, ptr, opt);
+
+	WaitForSingleObject(self_->guard_, INFINITE);
+	intptr_t result = self_->audioMaster(opcode, index, value, ptr, opt);
+	ReleaseMutex(self_->guard_);
+	return result;
 }
 
 
@@ -646,6 +693,10 @@ LRESULT CALLBACK SlaveUnit::windowProc(HWND hwnd, UINT message,
 			ShowWindow(hwnd, SW_HIDE);
 			return 0;
 		}
+	}
+	else if(hwnd == self_->childHwnd_) {
+		return CallWindowProc(self_->oldWndProc_, hwnd, message,
+				wParam, lParam);
 	}
 
 	return DefWindowProc(hwnd, message, wParam, lParam);

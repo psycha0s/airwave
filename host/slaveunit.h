@@ -30,6 +30,7 @@ private:
 	bool isInitialized_;
 	HMODULE module_;
 	HWND hwnd_;
+	HANDLE guard_;
 	AEffect* effect_;
 	VstTimeInfo timeInfo_;
 	VstEventKeeper events_;
@@ -48,6 +49,9 @@ private:
 	std::atomic_flag runAudio_;
 
 	bool isEditorOpen_;
+
+	WNDPROC oldWndProc_;
+	HWND childHwnd_;
 
 	static SlaveUnit* self_;
 	static constexpr const char* kWindowClass = PROJECT_NAME;

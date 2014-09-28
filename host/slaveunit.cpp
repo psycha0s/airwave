@@ -161,9 +161,9 @@ bool SlaveUnit::processRequest()
 
 	switch(frame->command) {
 	case Command::Dispatch:
-		WaitForSingleObject(guard_, INFINITE);
+//		WaitForSingleObject(guard_, INFINITE);
 		result = handleDispatch(frame);
-		ReleaseMutex(guard_);
+//		ReleaseMutex(guard_);
 		break;
 
 	case Command::GetParameter:
@@ -241,7 +241,7 @@ void SlaveUnit::audioThread()
 
 	while(runAudio_.test_and_set()) {
 		if(audioPort_.waitRequest(50)) {
-			WaitForSingleObject(guard_, INFINITE);
+//			WaitForSingleObject(guard_, INFINITE);
 
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
@@ -258,7 +258,7 @@ void SlaveUnit::audioThread()
 				LOG("audioThread() unacceptable command: %d", frame->command);
 			}
 
-			ReleaseMutex(guard_);
+//			ReleaseMutex(guard_);
 
 			frame->command = Command::Response;
 			audioPort_.sendResponse();

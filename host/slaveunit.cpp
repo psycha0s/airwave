@@ -227,6 +227,7 @@ std::string SlaveUnit::errorString() const
 void SlaveUnit::destroyEditorWindow()
 {
 	if(hwnd_) {
+		KillTimer(hwnd_, timerId_);
 		DestroyWindow(hwnd_);
 		UnregisterClass(kWindowClass, GetModuleHandle(nullptr));
 		hwnd_ = 0;
@@ -285,6 +286,11 @@ void SlaveUnit::handleSetDataBlock(DataFrame* frame)
 bool SlaveUnit::handleDispatch(DataFrame* frame)
 {
 //	LOG("handleDispatch: %s", kDispatchEvents[frame->opcode]);
+
+	if(isEditorOpen_ && frame->opcode != effEditIdle) {
+		// Delay delay the effEditIdle event by 100 milliseconds
+		SetTimer(hwnd_, timerId_, 100, nullptr);
+	}
 
 	switch(frame->opcode) {
 	case effClose:
@@ -393,6 +399,8 @@ bool SlaveUnit::handleDispatch(DataFrame* frame)
 				rect->bottom - rect->top, SWP_NOACTIVATE | SWP_NOMOVE);
 
 		std::memcpy(&frame->data, rect, sizeof(ERect));
+
+		timerId_ = SetTimer(hwnd_, 0, 100, nullptr);
 
 		HANDLE handle = GetPropA(hwnd_, "__wine_x11_whole_window");
 		frame->value = reinterpret_cast<intptr_t>(handle);
@@ -545,7 +553,7 @@ intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 	case audioMasterAutomate:
 	case audioMasterBeginEdit:
 	case audioMasterEndEdit:
-//	case audioMasterUpdateDisplay:
+	case audioMasterUpdateDisplay:
 	case audioMasterGetVendorVersion:
 	case audioMasterIOChanged:
 	case audioMasterSizeWindow:
@@ -561,8 +569,8 @@ intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 	case __audioMasterNeedIdleDeprecated:
 		// There is no need to translate this request to the VST host, because
 		// we can simply call the dispatcher.
-		if(isEditorOpen_)
-			effect_->dispatcher(effect_, effEditIdle, 0, 0, nullptr, 0.0f);
+//		if(isEditorOpen_)
+//			effect_->dispatcher(effect_, effEditIdle, 0, 0, nullptr, 0.0f);
 		return 1;
 
 	case audioMasterGetVendorString: {
@@ -677,6 +685,12 @@ LRESULT CALLBACK SlaveUnit::windowProc(HWND hwnd, UINT message,
 
 				self_->oldWndProc_ = reinterpret_cast<WNDPROC>(value);
 			}
+			break;
+
+		case WM_TIMER:
+			self_->effect_->dispatcher(self_->effect_, effEditIdle, 0, 0,
+					nullptr, 0.0f);
+			break;
 		}
 	}
 	else if(self_->childHwnd_ && hwnd == self_->childHwnd_) {

@@ -272,7 +272,7 @@ intptr_t MasterUnit::dispatch(DataPort* port, int32_t opcode, int32_t index,
 	// We will not transmit effEditIdle event because slave unit processes
 	// window events continuously in his main thread.
 	case effEditIdle:
-//		return 1;
+		return 1;
 
 	case effGetVstVersion:
 	case effOpen:

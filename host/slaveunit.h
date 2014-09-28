@@ -31,6 +31,7 @@ private:
 	HMODULE module_;
 	HWND hwnd_;
 	HANDLE guard_;
+	UINT_PTR timerId_;
 	AEffect* effect_;
 	VstTimeInfo timeInfo_;
 	VstEventKeeper events_;

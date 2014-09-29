@@ -550,7 +550,7 @@ intptr_t SlaveUnit::audioMaster(int32_t opcode, int32_t index,
 	case audioMasterAutomate:
 	case audioMasterBeginEdit:
 	case audioMasterEndEdit:
-	case audioMasterUpdateDisplay:
+//	case audioMasterUpdateDisplay:
 	case audioMasterGetVendorVersion:
 	case audioMasterIOChanged:
 	case audioMasterSizeWindow:

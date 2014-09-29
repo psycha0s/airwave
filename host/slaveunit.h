@@ -30,7 +30,7 @@ private:
 	bool isInitialized_;
 	HMODULE module_;
 	HWND hwnd_;
-	HANDLE guard_;
+	CRITICAL_SECTION cs_;
 	UINT_PTR timerId_;
 	AEffect* effect_;
 	VstTimeInfo timeInfo_;

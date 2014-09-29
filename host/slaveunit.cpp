@@ -35,7 +35,7 @@ SlaveUnit::~SlaveUnit()
 
 		destroyEditorWindow();
 
-		CloseHandle(guard_);
+		DeleteCriticalSection(&cs_);
 		FreeLibrary(module_);
 	}
 }
@@ -54,7 +54,10 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 		return false;
 	}
 
-	guard_ = CreateMutex(nullptr, false, nullptr);
+	if(!InitializeCriticalSectionAndSpinCount(&cs_, 0x00010000))  {
+		FreeLibrary(module_);
+		return false;
+	}
 
 	VstPluginMainProc vstMainProc = reinterpret_cast<VstPluginMainProc>(
 			GetProcAddress(module_, "VSTPluginMain"));
@@ -65,7 +68,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 
 		if(!vstMainProc) {
 			LOG("The %s is not a VST plugin");
-			CloseHandle(guard_);
+			DeleteCriticalSection(&cs_);
 			FreeLibrary(module_);
 			return false;
 		}
@@ -73,7 +76,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 
 	if(!controlPort_.connect(portId)) {
 		LOG("Unable to connect control port (id = %d)", portId);
-		CloseHandle(guard_);
+		DeleteCriticalSection(&cs_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -83,7 +86,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 	if(!controlPort_.waitRequest(3000)) {
 		LOG("Unable to get initial request from master unit");
 		controlPort_.disconnect();
-		CloseHandle(guard_);
+		DeleteCriticalSection(&cs_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -96,7 +99,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 
 		LOG("Master unit has incompatible protocol version: %d", frame->value);
 		controlPort_.disconnect();
-		CloseHandle(guard_);
+		DeleteCriticalSection(&cs_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -104,7 +107,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 	if(!callbackPort_.connect(frame->opcode)) {
 		LOG("Unable to connect callback port (id = %d)", frame->opcode);
 		controlPort_.disconnect();
-		CloseHandle(guard_);
+		DeleteCriticalSection(&cs_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -122,7 +125,7 @@ bool SlaveUnit::initialize(const char* fileName, int portId)
 		LOG("Unable to initialize VST plugin");
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
-		CloseHandle(guard_);
+		DeleteCriticalSection(&cs_);
 		FreeLibrary(module_);
 		return false;
 	}
@@ -161,9 +164,7 @@ bool SlaveUnit::processRequest()
 
 	switch(frame->command) {
 	case Command::Dispatch:
-//		WaitForSingleObject(guard_, INFINITE);
 		result = handleDispatch(frame);
-//		ReleaseMutex(guard_);
 		break;
 
 	case Command::GetParameter:
@@ -241,8 +242,6 @@ void SlaveUnit::audioThread()
 
 	while(runAudio_.test_and_set()) {
 		if(audioPort_.waitRequest(50)) {
-//			WaitForSingleObject(guard_, INFINITE);
-
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
 			if(frame->command == Command::ProcessSingle) {
@@ -257,8 +256,6 @@ void SlaveUnit::audioThread()
 			else {
 				LOG("audioThread() unacceptable command: %d", frame->command);
 			}
-
-//			ReleaseMutex(guard_);
 
 			frame->command = Command::Response;
 			audioPort_.sendResponse();
@@ -646,10 +643,12 @@ intptr_t VSTCALLBACK SlaveUnit::audioMasterProc(AEffect* effect, int32_t opcode,
 {
 	UNUSED(effect);
 
-	WaitForSingleObject(self_->guard_, INFINITE);
+//	LOG("handleAudioMaster(%s)", kAudioMasterEvents[opcode]);
+
+	EnterCriticalSection(&self_->cs_);
 	intptr_t result = self_->audioMaster(opcode, index, value, ptr, opt);
 
-	ReleaseMutex(self_->guard_);
+	LeaveCriticalSection(&self_->cs_);
 	return result;
 }
 

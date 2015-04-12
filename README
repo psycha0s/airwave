@@ -1,96 +1,113 @@
-Airwave is a WINE-based VST bridge, that allows to use Windows VST 2.4 plugins
-with Linux VST hosts.
+## About
+Airwave is a [WINE](https://www.winehq.org/)-based VST bridge, that allows for the use of Windows 32- and 64-bit VST 2.4 audio plugins with Linux VST hosts.
+Due to the use of shared memory, only one extra copying is made for each data transfer. Airwave also uses the XEMBED protocol to correctly embed the plugin editor into the host window.
 
-Due to use of shared memory, only one extra copying is made for each data
-transfer. Airwave also uses the XEMBED protocol to embed the plugin
-editor into the host window.
+## Compatibility
+The following list is not complete. It contains only plugins, that have been tested by me or by people, who sent me a report.
 
-It is the initial version that has many things, which are not implemented yet
-and of course it can contain a lot of bugs. However, it allows to work good
-enough with many VST plugins.
+| VST-Plugins | compatible? | Notes |
+|: --------------- :|: -------------- :|: ------------ :|
+| Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine |
+| Credland Audio BigKick | no | doesn't work with wine |
+| FabFilter Total bundle | yes | haven't tested them all |
+| Image-Line Harmless | yes | |
+| Image-Line Sytrus | yes | |
+| LennarDigital Sylenth1 | no | doesn't work with wine |
+| LePou Plugins | yes | LeCab2 has slight GUI redrawing issues |
+| NI Absynth | yes | |
+| NI FM8 | yes | |
+| NI Guitar Rig 5 | yes | activation doesn't work |
+| NI Kontakt 5 | mostly | up to v5.3.1, can import libraries only in Windows XP mode |
+| NI Massive | yes | only 32-bit |
+| NI Reaktor 5 | yes | |
+| Peavey Revalver Mark III.V | yes | |
+| ReFX Nexus2 | yes |  |
+| ReFX Vanguard | yes | |
+| Reveal Sound Spire | yes | starting form 1.0.19 the GUI doesn't appear (wine issue) |
+| Sonic Academy A.N.A. | yes | |
+| Sonic Academy KICK | yes | |
+| Smartelectronix s(M)exoscope | yes | |
+| Synth1 by Ichiro Toda | yes | |
+| Tone2 FireBird | yes | |
+| Tone2 Nemesis | yes | |
+| Tone2 Saurus | yes | |
+| u-he A.C.E. | yes | Linux version is also available |
+| u-he Bazille | yes | Linux version is also available |
+| u-he Diva | yes | Linux version is also available |
+| u-he Hive | yes | Linux version is also available |
+| u-he Presswerk | yes | Linux version is also available |
+| u-he Satin | yes | Linux version is also available |
+| u-he Uhbik | yes | Linux version is also available |
+| u-he Zebra2 | yes | Linux version is also available |
+| Variety of Sound | no | crash immediately |
+| Voxengo SPAN | yes | |
+| Voxengo SPAN Pro | mostly | inter plugin routing doesn't work (architecture issue) |
+| Xfer Serum | partly | the GUI doesn't appear (wine issue), but audio works |
 
-Tested VST hosts:
-- Bitwig Studio - works good
-- Renoise Tracker (demo) - works, only the few basic tests were made
-
-Tested VST plugins:
-- Synth1 by Ichiro Toda - works good
-- Image-Line Harmless - works good
-- Image-Line Sytrus - works good
-- u-he Zebra2 - works good
-- u-he Diva - has some sound glitches due to the high cpu load
-- u-he ACE - works good
-- ReFX Vanguard - works good, has some little redrawing issues
-- Native Instruments FM8 - works good
-
-Known issues:
-- There is some hack for embedding the editor window. You have a chance to get
-  the black window instead of plugin editor ;-)
-
-1. Requirements
+## Requirements
 - WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
-  but earlier versions also may work).
+but earlier versions also may work)
+- libmagic
+- Qt5 for the airwave manager application (GUI)
 
-- Qt4 for building the GUI utility application.
+## Building the source
+1. Install the required packages: multilib-enabled GCC, cmake, git, wine, Qt5, libmagic.
+  * **Arch Linux (x86_64)** example:
+    ```
+    sudo pacman -S gcc-multilib cmake git wine qt5-base
+    ```
 
-- Multilib-enabled toolchain for building 32-bit binaries on the x86_64.
+  * **Fedora 20 (x86_64)** example:
+    ```
+    sudo yum -y install gcc-c++ git cmake wine wine-devel wine-devel.i686 file file-devel libX11-devel libX11-devel.i686 qt5-devel glibc-devel.i686 glibc-devel
+    ```
 
-- CMake >= 2.8 for building.
+  * **Ubuntu 14.04 (x86_64)** example:
+    ```
+    sudo apt-get install git cmake gcc-multilib g++-multilib libx11-dev libx11-dev:i386 qt5-default libmagic-dev
+    sudo add-apt-repository ppa:ubuntu-wine/ppa
+    sudo apt-get update
+    sudo apt-get install wine1.7 wine1.7-dev
+    ```
+2. Get the VST Audio Plugins SDK [from Steinberg](http://www.steinberg.net/en/company/developers.html). I cannot distribute it myself due to the license restrictions.
 
-- GIT for getting the project source code.
+3. Unpack the VST SDK archive. Further I'll assume that you have unpacked it in your home directory: ${HOME}/VST3\ SDK.
 
+4. Clone the airwave GIT repository
+  ```
+  git clone https://github.com/phantom-code/airwave.git
+  ```
 
-2. Building the source
-If you use the Arch Linux, then you can get the latest development version
-by installing airwave-git package from the AUR. In other case use the following
-instructions for building:
+5. Go to the airwave source directory and execute the following commands:
+  ```
+  mkdir build && cd build
+  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave -DVSTSDK_PATH=${HOME}/VST3\ SDK ..
+  make
+  make install
+  ```
 
-First of all, you should unpack Steinberg VST 2.4 SDK archive to the source
-directory. Currently, Steinberg website allows download only VST3 SDK and if you
-unable to get 2.4 version, you could use the latest SDK, as it contains VST 2.4
-headers anyway. Check the http://www.steinberg.net/en/company/developers.html
-for proceed.
+Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
 
-Second, the following commands should be executed from the source directory
-(substitute your values ​inside of the angle brackets):
+## Usage
+1. Run the airwave-manager
+2. Press the "Create link" button on the toolbar.
+3. Select desired WINE loader and WINE prefix in the appropriate combo boxes.
+4. Enter a path to VST plugin DLL file in the "VST plugin" field (you can use the "Browse" button for convenience). Note, that the path is relative to the selected WINE prefix.
+5. Enter a "Link location" path (the directory, where your VST host looks for the plugins).
+6. Enter a link name, if you don't like the auto-suggested one.
+7. Select a desired log level for this link. The higher log level, the more messages you'll receive. The 'default' log level is a special value. It corresponds to the 'Default log level' value from the settings dialog. In most cases, the 'default' log level is the right choice. For maximum performance do not use the level higher than 'trace'.
+7. Press the OK button. At this point, your VST host should be able to find a new plugin inside of the "Link location" directory.
 
-mkdir build && cd build
+**Note:** After you have created the link you cannot move/rename it with a file manager. All updates have to be done inside the airwave-manager. Also, you should update your links after updating the airwave itself. This could be achived by pressing the "Update links" button.
 
-cmake .. -DCMAKE_INSTALL_PREFIX=<installation prefix> \
-         -DCMAKE_BUILD_TYPE="Release"                 \
-         -DVSTSDK_PATH=<path to VST SDK>
-make
-make install
+## Under the hood
+The bridge consists of four components:
+- Plugin endpoint (airwave-plugin-<arch>.so)
+- Host endpoint (airwave-host-<arch>.exe.so and airwave-host-<arch>.exe launcher script)
+- Configuration file (${XDG_CONFIG_PATH}/airwave/airwave.conf)
+- GUI configurator (airwave-manager)
 
-Please note, that some runtime-critical paths are hard-coded relative to the
-CMAKE_INSTALL_PREFIX at compile-time. So you should install files properly, and
-not just build and left them in place.
+When airwave-plugin is loaded by the VST host, it obtains its absolute path and use it as the key for getting the linked VST DLL from the configuration. Then it starts the airwave-host process and passes the path to the linked VST file. The airwave-host loads the VST DLL and works as a fake VST host. Starting from this point, the airwave-plugin and airwave-host act together like a proxy, translating commands between the native VST host and the Windows VST plugin.
 
-
-3. How does it work?
-The project consist of four components:
-- native VST plugin shared library (airwave-plugin-<arch>.so).
-- winelib VST host binary (airwave-host-<arch>.exe.so and
-  airwave-host-<arch>.exe launcher script).
-- configuration file (${XDG_CONFIG_PATH}/airwave/airwave.conf), where all link
-  information is stored.
-- GUI configuration utility (airwave-utility).
-
-When the airwave-plugin gets loaded, it obtains its own full path and use it
-for extracting from the configuration file the record of bound VST dll. If this
-record is found, airwave-plugin executes the airwave-host process, passing it
-the path to the real VST dll file. After that, airwave-plugin and airwave-host
-acts together like a proxy, translating commands between the real VST host and
-the real VST plugin.
-
-
-4. How to use it?
-Use the airwave-utility for create links to VST dlls. To do this, select the VST
-dll file in the left view, then in the right view go to the directory, where you
-want to place your link file, and then press the "create link" button. After
-link is created, you cannot just move created link files to other directories
-manually, as the configuration file should be updated accordingly. So it is
-easier to do all link management with the help of the airwave-utility
-application. Also note, that after updating the airwave to the newer version,
-all your link files should be recreated. You can do this in airwave-utility by
-clicking on the "recreate all links" button.
+## Known issues
+- Due to the bug in WINE, there is some hack for embedding the editor window. You have a chance to get the black window instead of the plugin GUI. Also, the plugin window may have un-updated areas after increasing its size. On some hosts (Bitwig Stuio for example) this can be solved by closing and reopening the plugin window.

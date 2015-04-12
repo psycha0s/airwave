@@ -1,26 +1,22 @@
-// This file has been generated automatically by CMake. Do not edit it
-// manually, as all changes will be overwritten in the future.
+// This file has been generated automatically by CMake. Do not edit it manually, as all
+// changes will be overwritten in the future.
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef CORE_CONFIG_H
+#define CORE_CONFIG_H
 
-// Project name
 #define PROJECT_NAME "@PROJECT_NAME@"
 
 // Program version
 #define VERSION_MAJOR @VERSION_MAJOR@
 #define VERSION_MINOR @VERSION_MINOR@
 #define VERSION_PATCH @VERSION_PATCH@
-#define PROJECT_VERSION "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@"
+#define VERSION_STRING "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@"
 
 // Various constants
-#define PROTOCOL_VERSION @PROTOCOL_VERSION@
+#cmakedefine PLATFORM_64BIT
+#define INSTALL_PREFIX "@INSTALL_PREFIX@"
 #define PLUGIN_BASENAME "@PLUGIN_BASENAME@"
-#define PLUGIN_PATH "@PLUGIN_PATH@"
 #define HOST_BASENAME "@HOST_BASENAME@"
-#define HOST_PATH "@HOST_PATH@"
-#cmakedefine ENABLE_LOGGER
-#define LOG_SOCKET_PATH "@LOG_SOCKET_PATH@"
 
 
-#endif // CONFIG_H
+#endif // CORE_CONFIG_H

@@ -53,8 +53,8 @@ set(CMAKE_MODULE_PATH
 )
 
 # Configure the VST SDK path
-set(VSTSDK_PATH ${PROJECT_SOURCE_DIR}/vstsdk2.4 CACHE PATH
-	"Path to the Steinberg VST 2.4 SDK")
+set(VSTSDK_PATH ${PROJECT_SOURCE_DIR}/VST3\ SDK CACHE PATH
+	"Path to the Steinberg VST Audio Plugins SDK")
 
 message(STATUS "VSTSDK_PATH is set to " ${VSTSDK_PATH})
 
@@ -63,7 +63,7 @@ find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h
 
 if(NOT VSTSDK_INCLUDE_DIR)
 	message(FATAL_ERROR "VST SDK is not found. You should set the VSTSDK_PATH variable "
-			"to te location where your copy the VST SDK ")
+			"to the directory, where your copy of the VST SDK is located.")
 endif()
 
 message(STATUS "VST SDK headers are found in ${VSTSDK_INCLUDE_DIR}")

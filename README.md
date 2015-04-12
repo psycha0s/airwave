@@ -5,44 +5,44 @@ Due to the use of shared memory, only one extra copying is made for each data tr
 ## Compatibility
 The following list is not complete. It contains only plugins, that have been tested by me or by people, who sent me a report.
 
-| VST-Plugins | compatible? | Notes |
-|: --------------- :|: -------------- :|: ------------ :|
-| Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine |
-| Credland Audio BigKick | no | doesn't work with wine |
-| FabFilter Total bundle | yes | haven't tested them all |
-| Image-Line Harmless | yes | |
-| Image-Line Sytrus | yes | |
-| LennarDigital Sylenth1 | no | doesn't work with wine |
-| LePou Plugins | yes | LeCab2 has slight GUI redrawing issues |
-| NI Absynth | yes | |
-| NI FM8 | yes | |
-| NI Guitar Rig 5 | yes | activation doesn't work |
-| NI Kontakt 5 | mostly | up to v5.3.1, can import libraries only in Windows XP mode |
-| NI Massive | yes | only 32-bit |
-| NI Reaktor 5 | yes | |
-| Peavey Revalver Mark III.V | yes | |
-| ReFX Nexus2 | yes |  |
-| ReFX Vanguard | yes | |
-| Reveal Sound Spire | yes | starting form 1.0.19 the GUI doesn't appear (wine issue) |
-| Sonic Academy A.N.A. | yes | |
-| Sonic Academy KICK | yes | |
-| Smartelectronix s(M)exoscope | yes | |
-| Synth1 by Ichiro Toda | yes | |
-| Tone2 FireBird | yes | |
-| Tone2 Nemesis | yes | |
-| Tone2 Saurus | yes | |
-| u-he A.C.E. | yes | Linux version is also available |
-| u-he Bazille | yes | Linux version is also available |
-| u-he Diva | yes | Linux version is also available |
-| u-he Hive | yes | Linux version is also available |
-| u-he Presswerk | yes | Linux version is also available |
-| u-he Satin | yes | Linux version is also available |
-| u-he Uhbik | yes | Linux version is also available |
-| u-he Zebra2 | yes | Linux version is also available |
-| Variety of Sound | no | crash immediately |
-| Voxengo SPAN | yes | |
-| Voxengo SPAN Pro | mostly | inter plugin routing doesn't work (architecture issue) |
-| Xfer Serum | partly | the GUI doesn't appear (wine issue), but audio works |
+ VST-Plugins | works? | Notes |
+------------:|:----------:|:-------|
+ Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine
+ Credland Audio BigKick | no | doesn't work with wine
+ FabFilter Total bundle | yes | haven't tested them all
+ Image-Line Harmless | yes |
+ Image-Line Sytrus | yes |
+ LennarDigital Sylenth1 | no | doesn't work with wine
+ LePou Plugins | yes | LeCab2 has slight GUI redrawing issues
+ NI Absynth | yes |
+ NI FM8 | yes |
+ NI Guitar Rig 5 | yes | activation doesn't work
+ NI Kontakt 5 | mostly | up to v5.3.1, can import libraries only in Windows XP mode
+ NI Massive | yes | only 32-bit
+ NI Reaktor 5 | yes |
+ Peavey Revalver Mark III.V | yes |
+ ReFX Nexus2 | yes |
+ ReFX Vanguard | yes |
+ Reveal Sound Spire | yes | starting form 1.0.19 the GUI doesn't appear (wine issue)
+ Sonic Academy A.N.A. | yes |
+ Sonic Academy KICK | yes |
+ Smartelectronix s(M)exoscope | yes |
+ Synth1 by Ichiro Toda | yes |
+ Tone2 FireBird | yes |
+ Tone2 Nemesis | yes |
+ Tone2 Saurus | yes |
+ u-he A.C.E. | yes | Linux version is also available
+ u-he Bazille | yes | Linux version is also available
+ u-he Diva | yes | Linux version is also available
+ u-he Hive | yes | Linux version is also available
+ u-he Presswerk | yes | Linux version is also available
+ u-he Satin | yes | Linux version is also available
+ u-he Uhbik | yes | Linux version is also available
+ u-he Zebra2 | yes | Linux version is also available
+ Variety of Sound | no | crash immediately
+ Voxengo SPAN | yes |
+ Voxengo SPAN Pro | mostly | inter plugin routing doesn't work (architecture issue)
+ Xfer Serum | partly | the GUI doesn't appear (wine issue), but audio works
 
 ## Requirements
 - WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,

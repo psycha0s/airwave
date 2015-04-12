@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Aiwave manager
+Name=Airwave manager
 Comment=A tool for managing the Airwave VST bridge
 Exec=airwave-manager
 Icon=airwave-manager

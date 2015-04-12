@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/">
+        <file>airwave-manager.png</file>
+        <file>create_link.png</file>
+        <file>edit.png</file>
+        <file>update.png</file>
+        <file>remove.png</file>
+        <file>open_in_browser.png</file>
+        <file>outline.png</file>
+        <file>download.png</file>
+        <file>draw_line.png</file>
+        <file>erase.png</file>
+        <file>settings.png</file>
+        <file>32bit.png</file>
+        <file>64bit.png</file>
+        <file>unknown.png</file>
+        <file>go_up.png</file>
+        <file>create_folder.png</file>
+        <file>show.png</file>
+        <file>open.png</file>
+        <file>save.png</file>
+        <file>mute.png</file>
+        <file>bug.png</file>
+        <file>scull.png</file>
+        <file>star.png</file>
+        <file>trace.png</file>
+        <file>warning.png</file>
+        <file>about.png</file>
+    </qresource>
+</RCC>

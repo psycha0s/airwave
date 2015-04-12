@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Aiwave manager
+Comment=A tool for managing the Airwave VST bridge
+Exec=airwave-manager
+Icon=airwave-manager
+Terminal=false
+Categories=Multimedia;AudioVideo;Player;Recorder;

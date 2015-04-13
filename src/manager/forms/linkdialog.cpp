@@ -178,7 +178,11 @@ void LinkDialog::browsePlugin()
 	}
 
 	if(dialog.exec()) {
-		int length = prefixInfo.absoluteFilePath().length() + 1; // Take '/' into account
+		QString prefixPath = prefixInfo.absoluteFilePath();
+		int length = prefixPath.length();
+		if(!prefixPath.endsWith('/'))
+			length++;
+
 		targetEdit_->setText(dialog.selectedPath().mid(length));
 
 		QString name = dialog.selectedName();

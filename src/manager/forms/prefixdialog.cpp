@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include <QIcon>
 #include <QLabel>
+#include <QMessageBox>
 #include "core/application.h"
 #include "forms/filedialog.h"
 #include "models/prefixesmodel.h"
@@ -11,7 +12,8 @@
 
 
 PrefixDialog::PrefixDialog(QWidget* parent) :
-	QDialog(parent)
+	QDialog(parent),
+	item_(nullptr)
 {
 	setupUi();
 }
@@ -100,14 +102,26 @@ void PrefixDialog::setItem(PrefixItem* item)
 
 void PrefixDialog::accept()
 {
+	QString name = nameEdit_->text();
+	QString message = QString("The prefix with name '%1' is already exist.").arg(name);
+
 	if(!item_) {
 		if(!qApp->prefixes()->createPrefix(nameEdit_->text(), pathEdit_->text())) {
-			// TODO messagebox
+			QMessageBox::critical(this, "Error", message);
 			return;
 		}
 	}
-	else {
+	else if(name != item_->name()) {
+		Storage::Prefix prefix = qApp->storage()->prefix(name.toStdString());
+		if(!prefix.isNull()) {
+			QMessageBox::critical(this, "Error", message);
+			return;
+		}
+
 		item_->setName(nameEdit_->text());
+		item_->setPath(pathEdit_->text());
+	}
+	else {
 		item_->setPath(pathEdit_->text());
 	}
 

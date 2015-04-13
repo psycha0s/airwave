@@ -247,13 +247,8 @@ void SettingsDialog::editPrefix()
 	}
 
 	PrefixDialog dialog;
-	dialog.setName(item->name());
-	dialog.setPath(item->path());
-
-	if(dialog.exec()) {
-		item->setName(dialog.name());
-		item->setPath(dialog.path());
-	}
+	dialog.setItem(item);
+	dialog.exec();
 }
 
 

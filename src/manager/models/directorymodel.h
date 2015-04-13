@@ -19,9 +19,13 @@ public:
 	i64 size() const;
 
 	QString humanReadableSize() const;
+	QString type() const;
 
 private:
 	QFileInfo info_;
+	QString type_;
+
+	QString getType() const;
 };
 
 

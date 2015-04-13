@@ -6,7 +6,8 @@
 
 
 DirectoryItem::DirectoryItem(const QFileInfo& info) :
-	info_(info)
+	info_(info),
+	type_(getType())
 {
 }
 
@@ -56,6 +57,34 @@ QString DirectoryItem::humanReadableSize() const
 }
 
 
+QString DirectoryItem::type() const
+{
+	return type_;
+}
+
+
+QString DirectoryItem::getType() const
+{
+	if(info_.isRoot())
+		return "Drive";
+
+	if(info_.isFile()) {
+		if(!info_.suffix().isEmpty())
+			return QString("%1 File").arg(info_.suffix());
+
+		return "File";
+	}
+
+	if(info_.isDir())
+		return "Folder";
+
+	if(info_.isSymLink())
+		return "Shortcut";
+
+	return "Unknown";
+}
+
+
 DirectoryModel::DirectoryModel(QObject* parent) :
 	GenericTreeModel<DirectoryItem>(new DirectoryItem(), parent),
 	filters_(QDir::AllEntries),
@@ -85,12 +114,14 @@ QVariant DirectoryModel::data(const QModelIndex& index, int role) const
 				return item->name();
 			}
 			else if(column == 1) {
-				if(!item->isDirectory())
+				if(!item->isDirectory()) {
 					return item->humanReadableSize();
+				}
+
+				return "<DIR>";
 			}
 			else if(column == 2) {
-			}
-			else if(column == 3) {
+				return item->type();
 			}
 		}
 		else if(role == Qt::DecorationRole && index.column() == 0) {

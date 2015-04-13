@@ -36,9 +36,7 @@ void LinkDialog::setItem(LinkItem* item)
 	item_ = item;
 
 	if(item) {
-		nameEdit_->setText(item->name());
 		locationEdit_->setText(item->location());
-		targetEdit_->setText(item->target());
 
 		int index = prefixCombo_->findText(item->prefix());
 		prefixCombo_->setCurrentIndex(index);
@@ -48,6 +46,9 @@ void LinkDialog::setItem(LinkItem* item)
 
 		index = static_cast<int>(item->logLevel()) + 1;
 		logLevelCombo_->setCurrentIndex(index);
+
+		nameEdit_->setText(item->name());
+		targetEdit_->setText(item->target());
 	}
 	else {
 		nameEdit_->clear();
@@ -178,7 +179,11 @@ void LinkDialog::browsePlugin()
 	}
 
 	if(dialog.exec()) {
-		int length = prefixInfo.absoluteFilePath().length() + 1; // Take '/' into account
+		QString prefixPath = prefixInfo.absoluteFilePath();
+		int length = prefixPath.length();
+		if(!prefixPath.endsWith('/'))
+			length++;
+
 		targetEdit_->setText(dialog.selectedPath().mid(length));
 
 		QString name = dialog.selectedName();

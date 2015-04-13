@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include <QIcon>
 #include <QLabel>
+#include <QMessageBox>
 #include "core/application.h"
 #include "forms/filedialog.h"
 #include "models/prefixesmodel.h"
@@ -11,7 +12,8 @@
 
 
 PrefixDialog::PrefixDialog(QWidget* parent) :
-	QDialog(parent)
+	QDialog(parent),
+	item_(nullptr)
 {
 	setupUi();
 }
@@ -77,35 +79,50 @@ void PrefixDialog::browseForWinePrefix()
 }
 
 
-QString PrefixDialog::name() const
+PrefixItem* PrefixDialog::item() const
 {
-	return nameEdit_->text();
+	return item_;
 }
 
 
-void PrefixDialog::setName(const QString& name)
+void PrefixDialog::setItem(PrefixItem* item)
 {
-	nameEdit_->setText(name);
-}
+	item_ = item;
 
-
-QString PrefixDialog::path() const
-{
-	return pathEdit_->text();
-}
-
-
-void PrefixDialog::setPath(const QString& path)
-{
-	pathEdit_->setText(path);
+	if(item_) {
+		nameEdit_->setText(item->name());
+		pathEdit_->setText(item->path());
+	}
+	else {
+		nameEdit_->clear();
+		pathEdit_->clear();
+	}
 }
 
 
 void PrefixDialog::accept()
 {
-	if(!qApp->prefixes()->createPrefix(nameEdit_->text(), pathEdit_->text())) {
-		// TODO messagebox
-		return;
+	QString name = nameEdit_->text();
+	QString message = QString("The prefix with name '%1' is already exist.").arg(name);
+
+	if(!item_) {
+		if(!qApp->prefixes()->createPrefix(nameEdit_->text(), pathEdit_->text())) {
+			QMessageBox::critical(this, "Error", message);
+			return;
+		}
+	}
+	else if(name != item_->name()) {
+		Storage::Prefix prefix = qApp->storage()->prefix(name.toStdString());
+		if(!prefix.isNull()) {
+			QMessageBox::critical(this, "Error", message);
+			return;
+		}
+
+		item_->setName(nameEdit_->text());
+		item_->setPath(pathEdit_->text());
+	}
+	else {
+		item_->setPath(pathEdit_->text());
 	}
 
 	QDialog::accept();

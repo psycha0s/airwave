@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include <QIcon>
 #include <QLabel>
+#include <QMessageBox>
 #include "core/application.h"
 #include "forms/filedialog.h"
 #include "models/loadersmodel.h"
@@ -99,14 +100,26 @@ void LoaderDialog::setItem(LoaderItem* item)
 
 void LoaderDialog::accept()
 {
+	QString name = nameEdit_->text();
+	QString message = QString("The loader with name '%1' is already exist.").arg(name);
+
 	if(!item_) {
 		if(!qApp->loaders()->createLoader(nameEdit_->text(), pathEdit_->text())) {
-			// TODO messagebox
+			QMessageBox::critical(this, "Error", message);
 			return;
 		}
 	}
-	else {
+	else if(name != item_->name()) {
+		Storage::Loader loader = qApp->storage()->loader(name.toStdString());
+		if(!loader.isNull()) {
+			QMessageBox::critical(this, "Error", message);
+			return;
+		}
+
 		item_->setName(nameEdit_->text());
+		item_->setPath(pathEdit_->text());
+	}
+	else {
 		item_->setPath(pathEdit_->text());
 	}
 

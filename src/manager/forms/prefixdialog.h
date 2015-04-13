@@ -6,6 +6,7 @@
 
 class QDialogButtonBox;
 class LineEdit;
+class PrefixItem;
 
 
 class PrefixDialog : public QDialog {
@@ -13,17 +14,14 @@ class PrefixDialog : public QDialog {
 public:
 	PrefixDialog(QWidget* parent = nullptr);
 
-	QString name() const;
-	void setName(const QString& name);
-
-	QString path() const;
-	void setPath(const QString& path);
-
+	PrefixItem* item() const;
+	void setItem(PrefixItem* item);
 
 private:
 	LineEdit* nameEdit_;
 	LineEdit* pathEdit_;
 	QDialogButtonBox* buttons_;
+	PrefixItem* item_;
 
 	void setupUi();
 

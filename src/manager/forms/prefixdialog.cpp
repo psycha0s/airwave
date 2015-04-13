@@ -77,35 +77,38 @@ void PrefixDialog::browseForWinePrefix()
 }
 
 
-QString PrefixDialog::name() const
+PrefixItem* PrefixDialog::item() const
 {
-	return nameEdit_->text();
+	return item_;
 }
 
 
-void PrefixDialog::setName(const QString& name)
+void PrefixDialog::setItem(PrefixItem* item)
 {
-	nameEdit_->setText(name);
-}
+	item_ = item;
 
-
-QString PrefixDialog::path() const
-{
-	return pathEdit_->text();
-}
-
-
-void PrefixDialog::setPath(const QString& path)
-{
-	pathEdit_->setText(path);
+	if(item_) {
+		nameEdit_->setText(item->name());
+		pathEdit_->setText(item->path());
+	}
+	else {
+		nameEdit_->clear();
+		pathEdit_->clear();
+	}
 }
 
 
 void PrefixDialog::accept()
 {
-	if(!qApp->prefixes()->createPrefix(nameEdit_->text(), pathEdit_->text())) {
-		// TODO messagebox
-		return;
+	if(!item_) {
+		if(!qApp->prefixes()->createPrefix(nameEdit_->text(), pathEdit_->text())) {
+			// TODO messagebox
+			return;
+		}
+	}
+	else {
+		item_->setName(nameEdit_->text());
+		item_->setPath(pathEdit_->text());
 	}
 
 	QDialog::accept();

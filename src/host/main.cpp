@@ -52,6 +52,7 @@ int main(int argc, const char* argv[])
 		}
 	}
 
+	TRACE("Terminating the host endpoint...");
 	delete host;
 
 	TRACE("Host endpoint terminated");

@@ -234,10 +234,14 @@ intptr_t Plugin::handleAudioMaster()
 intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		void* ptr, float opt)
 {
-	if(opcode != effCanBeAutomated && opcode != effGetProgramNameIndexed &&
-			opcode != effEditIdle && opcode != effGetParamDisplay &&
-			opcode != effGetParamLabel && opcode != effGetParameterProperties) {
-		FLOOD("dispatch: %s", kDispatchEvents[opcode]);
+//	if(opcode != effCanBeAutomated && opcode != effGetProgramNameIndexed &&
+//			opcode != effEditIdle && opcode != effGetParamDisplay &&
+//			opcode != effGetParamLabel && opcode != effGetParameterProperties) {
+//		FLOOD("dispatch: %s", kDispatchEvents[opcode]);
+//	}
+
+	if(opcode != effEditIdle && opcode) {
+		FLOOD("(%p) dispatch: %s", std::this_thread::get_id(), kDispatchEvents[opcode]);
 	}
 
 	DataFrame* frame = port->frame<DataFrame>();
@@ -378,16 +382,19 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		port->waitResponse();
 		return frame->value; }
 
-	case effGetProgramName: {
+	case effGetProgramName:
 		port->sendRequest();
 		port->waitResponse();
 
-		const char* source = reinterpret_cast<const char*>(frame->data);
-		char* dest         = static_cast<char*>(ptr);
+		if(frame->value) {
+			const char* source = reinterpret_cast<const char*>(frame->data);
+			char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
-		return frame->value; }
+			std::strncpy(dest, source, kVstMaxProgNameLen);
+			dest[kVstMaxProgNameLen-1] = '\0';
+		}
+
+		return frame->value;
 
 	case effSetProgramName: {
 		const char* source = static_cast<const char*>(ptr);
@@ -401,40 +408,49 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		return frame->value; }
 
 	case effGetVendorString:
-	case effGetProductString: {
+	case effGetProductString:
 		port->sendRequest();
 		port->waitResponse();
 
-		const char* source = reinterpret_cast<const char*>(frame->data);
-		char* dest         = static_cast<char*>(ptr);
+		if(frame->value) {
+			const char* source = reinterpret_cast<const char*>(frame->data);
+			char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxVendorStrLen);
-		dest[kVstMaxVendorStrLen-1] = '\0';
-		return frame->value; }
+			std::strncpy(dest, source, kVstMaxVendorStrLen);
+			dest[kVstMaxVendorStrLen-1] = '\0';
+		}
+
+		return frame->value;
 
 	case effGetParamName:
 	case effGetParamLabel:
-	case effGetParamDisplay: {
+	case effGetParamDisplay:
 		port->sendRequest();
 		port->waitResponse();
 
-		const char* source = reinterpret_cast<const char*>(frame->data);
-		char* dest         = static_cast<char*>(ptr);
+		if(frame->value) {
+			const char* source = reinterpret_cast<const char*>(frame->data);
+			char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxParamStrLen);
-		dest[kVstMaxParamStrLen-1] = '\0';
-		return frame->value; }
+			std::strncpy(dest, source, kVstMaxParamStrLen);
+			dest[kVstMaxParamStrLen-1] = '\0';
+		}
 
-	case effGetEffectName: {
+		return frame->value;
+
+	case effGetEffectName:
 		port->sendRequest();
 		port->waitResponse();
 
-		const char* source = reinterpret_cast<const char*>(frame->data);
-		char* dest         = static_cast<char*>(ptr);
+		if(frame->value) {
+			const char* source = reinterpret_cast<const char*>(frame->data);
+			char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxEffectNameLen);
-		dest[kVstMaxEffectNameLen-1] = '\0';
-		return frame->value; }
+			std::strncpy(dest, source, kVstMaxEffectNameLen);
+			dest[kVstMaxEffectNameLen-1] = '\0';
+		}
+
+		return frame->value;
 
 	case effGetParameterProperties:
 		port->sendRequest();
@@ -451,16 +467,19 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		std::memcpy(ptr, frame->data, sizeof(VstPinProperties));
 		return frame->value;
 
-	case effGetProgramNameIndexed: {
+	case effGetProgramNameIndexed:
 		port->sendRequest();
 		port->waitResponse();
 
-		const char* source = reinterpret_cast<const char*>(frame->data);
-		char* dest         = static_cast<char*>(ptr);
+		if(frame->value) {
+			const char* source = reinterpret_cast<const char*>(frame->data);
+			char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
-		return frame->value; }
+			std::strncpy(dest, source, kVstMaxProgNameLen);
+			dest[kVstMaxProgNameLen-1] = '\0';
+		}
+
+		return frame->value;
 
 	case effGetMidiKeyName:
 		port->sendRequest();

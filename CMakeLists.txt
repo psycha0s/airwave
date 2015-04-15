@@ -6,7 +6,7 @@ project(${PROJECT_NAME})
 # Project version
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 1)
+set(VERSION_PATCH 2)
 
 # Set plugin shared library base name
 set(PLUGIN_BASENAME ${PROJECT_NAME}-plugin)

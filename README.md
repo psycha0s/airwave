@@ -39,7 +39,7 @@ The following list is not complete. It contains only plugins, that have been tes
  u-he Satin | yes | Linux version is also available
  u-he Uhbik | yes | Linux version is also available
  u-he Zebra2 | yes | Linux version is also available
- Variety of Sound | no | crash immediately
+ Variety of Sound plugins | yes |
  Voxengo SPAN | yes |
  Voxengo SPAN Pro | mostly | inter plugin routing doesn't work (architecture issue)
  Xfer Serum | partly | the GUI doesn't appear (wine issue), but audio works

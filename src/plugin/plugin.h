@@ -8,7 +8,7 @@
 #include <vector>
 #include <X11/Xlib.h>
 #include "common/dataport.h"
-#include "common/eventsignal.h"
+#include "common/event.h"
 #include "common/vst24.h"
 #include "common/vsteventkeeper.h"
 
@@ -47,7 +47,7 @@ private:
 	DataPort callbackPort_;
 	DataPort audioPort_;
 
-	EventSignal condition_;
+	Event condition_;
 
 	int childPid_;
 

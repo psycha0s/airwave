@@ -28,7 +28,7 @@ endif()
 # Sources
 set(SOURCES
 	../common/dataport.cpp
-	../common/eventsignal.cpp
+	../common/event.cpp
 	../common/filesystem.cpp
 	../common/logger.cpp
 	../common/vsteventkeeper.cpp

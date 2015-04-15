@@ -27,7 +27,7 @@ set(SOURCES
 	main.cpp
 	plugin.cpp
 	../common/dataport.cpp
-	../common/eventsignal.cpp
+	../common/event.cpp
 	../common/filesystem.cpp
 	../common/json.cpp
 	../common/logger.cpp

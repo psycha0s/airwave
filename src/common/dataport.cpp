@@ -47,9 +47,7 @@ bool DataPort::create(size_t frameSize)
 		return false;
 	}
 
-	ControlBlock* control = controlBlock();
-	sem_init(&control->request, 1, 0);
-	sem_init(&control->response, 1, 0);
+	new (controlBlock()) ControlBlock;
 
 	frameSize_ = frameSize;
 	return true;
@@ -89,9 +87,9 @@ void DataPort::disconnect()
 {
 	if(!isNull()) {
 		if(!isConnected()) {
-			ControlBlock* control = controlBlock();
-			sem_destroy(&control->request);
-			sem_destroy(&control->response);
+//			ControlBlock* control = controlBlock();
+//			sem_destroy(&control->request);
+//			sem_destroy(&control->response);
 		}
 
 		shmdt(buffer_);
@@ -142,74 +140,33 @@ void* DataPort::frameBuffer()
 
 void DataPort::sendRequest()
 {
-	if(!isNull()) {
-		if(sem_post(&controlBlock()->request) != 0)
-			ERROR("sem_post() call failed: %s", strerror(errno));
-	}
+	if(!isNull())
+		controlBlock()->request.post();
 }
 
 
 void DataPort::sendResponse()
 {
-	if(!isNull()) {
-		if(sem_post(&controlBlock()->response) != 0)
-			ERROR("sem_post() call failed: %s", strerror(errno));
-	}
+	if(!isNull())
+		controlBlock()->response.post();
 }
 
 
 bool DataPort::waitRequest(int msecs)
 {
-	return waitForReady(&controlBlock()->request, msecs);
+	return controlBlock()->request.wait(msecs);
 }
 
 
 bool DataPort::waitResponse(int msecs)
 {
-	return waitForReady(&controlBlock()->response, msecs);
+	return controlBlock()->response.wait(msecs);
 }
 
 
 DataPort::ControlBlock* DataPort::controlBlock()
 {
 	return static_cast<ControlBlock*>(buffer_);
-}
-
-
-bool DataPort::waitForReady(sem_t* semaphore, int msecs)
-{
-	if(isNull())
-		return false;
-
-	if(msecs < 0) {
-		if(sem_wait(semaphore) != 0) {
-			ERROR("sem_wait() call failed: %d", errno);
-			return false;
-		}
-	}
-	else {
-		int seconds = msecs / 1000;
-		msecs %= 1000;
-
-		timespec tm;
-		clock_gettime(CLOCK_REALTIME, &tm);
-		tm.tv_sec += seconds;
-		tm.tv_nsec += msecs * 1000000;
-
-		if(tm.tv_nsec >= 1000000000L) {
-			tm.tv_sec++;
-			tm.tv_nsec -= 1000000000L;
-		}
-
-		if(sem_timedwait(semaphore, &tm) != 0) {
-			if(errno != ETIMEDOUT)
-				ERROR("sem_timedwait() call failed: %d", errno);
-
-			return false;
-		}
-	}
-
-	return true;
 }
 
 

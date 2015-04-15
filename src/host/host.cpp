@@ -146,8 +146,10 @@ bool Host::initialize(const char* fileName, int portId)
 
 bool Host::processRequest()
 {
-	if(!controlPort_.isConnected())
+	if(!controlPort_.isConnected()) {
+		TRACE("Control port isn't connected anymore, exiting");
 		return false;
+	}
 
 	if(!controlPort_.waitRequest(20))
 		return true;

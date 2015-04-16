@@ -1,16 +1,17 @@
 #include "event.h"
 
+#include <errno.h>
 #include <syscall.h>
 #include <time.h>
 #include <unistd.h>
 #include <linux/futex.h>
 
 
-#define futex_wait(count, timeout) \
-		(syscall(SYS_futex, count, FUTEX_WAIT, 0, timeout, nullptr, 0) == 0)
+#define futex_wait(futex, count, timeout) \
+		(syscall(SYS_futex, futex, FUTEX_WAIT, count, timeout, nullptr, 0) == 0)
 
-#define futex_post(count) \
-		(syscall(SYS_futex, count, FUTEX_WAKE, 1, nullptr, nullptr, 0) == 0)
+#define futex_post(futex, count) \
+		(syscall(SYS_futex, futex, FUTEX_WAKE, count, nullptr, nullptr, 0) == 0)
 
 
 Event::Event() :
@@ -21,31 +22,35 @@ Event::Event() :
 
 bool Event::wait(int msecs)
 {
-	bool result;
+	timespec* timeout = nullptr;
+	timespec tm;
 
-	if(msecs < 0) {
-		result = futex_wait(&count_, nullptr);
-	}
-	else {
+	if(msecs >= 0) {
 		int seconds = msecs / 1000;
 		msecs %= 1000;
 
-		timespec tm;
 		tm.tv_sec  = seconds;
 		tm.tv_nsec = msecs * 1000000;
 
-		result = futex_wait(&count_, &tm);
+		timeout = &tm;
 	}
 
-	if(result)
-		count_--;
+	while(count_ == 0) {
+		if(!futex_wait(&count_, 0, timeout)) {
+			if(errno == EWOULDBLOCK)
+				continue;
 
-	return result;
+			return false;
+		}
+	}
+
+	count_--;
+	return true;
 }
 
 
 void Event::post()
 {
 	count_++;
-	futex_post(&count_);
+	futex_post(&count_, 1);
 }

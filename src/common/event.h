@@ -17,7 +17,7 @@ public:
 	bool wait(int msecs = kInfinite);
 	void post();
 
-//private:
+private:
 	std::atomic<int> count_;
 };
 

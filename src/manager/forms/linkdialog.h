@@ -30,7 +30,7 @@ private:
 
 	void setupUi();
 	QString currentPrefix() const;
-	QString pluginPathFor(const QString& vstPath) const;
+	QString getPluginPath() const;
 
 private slots:
 	void browsePlugin();

@@ -237,7 +237,7 @@ void LinkDialog::accept()
 		return;
 	}
 
-	QString pluginPath = pluginPathFor(vstInfo.absoluteFilePath());
+	QString pluginPath = getPluginPath();
 	if(pluginPath.isEmpty()) {
 		QMessageBox::critical(this, "Error", "VST plugin is corrupted.");
 		return;
@@ -328,20 +328,8 @@ QString LinkDialog::currentPrefix() const
 }
 
 
-QString LinkDialog::pluginPathFor(const QString& vstPath) const
+QString LinkDialog::getPluginPath() const
 {
 	QString pluginPath = QString::fromStdString(qApp->storage()->binariesPath());
-	pluginPath += "/" PLUGIN_BASENAME;
-
-	ModuleInfo* moduleInfo = ModuleInfo::instance();
-	ModuleInfo::Arch arch = moduleInfo->getArch(vstPath);
-
-	if(arch == ModuleInfo::kArch32) {
-		return pluginPath + "-32.so";
-	}
-	else if(arch == ModuleInfo::kArch64) {
-		return pluginPath + "-64.so";
-	}
-
-	return QString();
+	return pluginPath + "/" PLUGIN_BASENAME ".so";
 }

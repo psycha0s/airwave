@@ -19,6 +19,7 @@ set(SOURCES
 	main.cpp
 	../common/filesystem.cpp
 	../common/json.cpp
+#	../common/moduleinfo.cpp
 	../common/storage.cpp
 	core/application.cpp
 	core/logsocket.cpp

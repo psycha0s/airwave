@@ -36,12 +36,8 @@ bool Event::wait(int msecs)
 	}
 
 	while(count_ == 0) {
-		if(!futex_wait(&count_, 0, timeout)) {
-			if(errno == EWOULDBLOCK)
-				continue;
-
+		if(!futex_wait(&count_, 0, timeout) && errno != EWOULDBLOCK)
 			return false;
-		}
 	}
 
 	count_--;

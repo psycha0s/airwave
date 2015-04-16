@@ -321,31 +321,11 @@ void MainForm::updateLinks()
 
 	LinkItem* item = qApp->links()->root()->firstChild();
 	while(item) {
-		auto prefix = qApp->storage()->prefix(item->prefix().toStdString());
-		if(!prefix)
-			continue;
-
-		QString prefixPath = QString::fromStdString(prefix.path());
-		QFileInfo vstInfo(prefixPath + '/' + item->target());
-
-		ModuleInfo* moduleInfo = ModuleInfo::instance();
-		ModuleInfo::Arch arch = moduleInfo->getArch(vstInfo.absoluteFilePath());
-
-		QString pluginName;
-		if(arch == ModuleInfo::kArch32) {
-			pluginName = PLUGIN_BASENAME "-32.so";
-		}
-		else if(arch == ModuleInfo::kArch64) {
-			pluginName = PLUGIN_BASENAME "-64.so";
-		}
-		else {
-			continue;
-		}
-
 		QFileInfo linkInfo(item->path());
 		QDir dir(linkInfo.absoluteDir());
 		dir.remove(linkInfo.fileName());
 
+		QString pluginName = PLUGIN_BASENAME ".so";
 		QFile::copy(pluginPath + '/' + pluginName, linkInfo.absoluteFilePath());
 
 		item = item->nextSibling();

@@ -1,4 +1,3 @@
-#include <QString>
 #include "moduleinfo.h"
 
 
@@ -7,12 +6,10 @@ ModuleInfo::ModuleInfo() :
 {
 	magic_ = magic_open(MAGIC_NONE);
 	if(!magic_) {
-		qDebug("Unable to initialize libmagic.");
 		return;
 	}
 
 	if(magic_load(magic_, nullptr) != 0) {
-		qDebug("libmagic error: %s", magic_error(magic_));
 		magic_close(magic_);
 		return;
 	}
@@ -34,18 +31,18 @@ ModuleInfo* ModuleInfo::instance()
 }
 
 
-ModuleInfo::Arch ModuleInfo::getArch(const QString& fileName) const
+ModuleInfo::Arch ModuleInfo::getArch(const std::string& fileName) const
 {
 	if(isInitialized_) {
-		const char* buffer = magic_file(magic_, fileName.toUtf8().data());
+		const char* buffer = magic_file(magic_, fileName.c_str());
 
 		if(buffer) {
-			QString string = buffer;
+			std::string string = buffer;
 
-			if(string.indexOf("80386") != -1) {
+			if(string.find("80386") != std::string::npos) {
 				return kArch32;
 			}
-			else if(string.indexOf("x86-64") != -1) {
+			else if(string.find("x86-64") != std::string::npos) {
 				return kArch64;
 			}
 		}

@@ -9,7 +9,7 @@
 namespace Airwave {
 
 
-//using AudioMasterProc = intptr (VSTCALLBACK*)(AEffect*, i32, i32, intptr, void*, float);
+//using AudioMasterProc = intptr_t (VSTCALLBACK*)(AEffect*, i32, i32, intptr_t, void*, float);
 //using VstPluginMainProc = AEffect* (VSTCALLBACK*)(AudioMasterProc);
 
 typedef	intptr_t (VSTCALLBACK *AudioMasterProc)(AEffect*, i32, i32, intptr_t, void*,

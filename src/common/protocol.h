@@ -27,7 +27,7 @@ struct DataFrame {
 	Command command;
 	i32     opcode;
 	i32     index;
-	intptr  value;
+	i64     value;	// The 64-bit value is used here to avoid 64->32 bridging issues
 	float   opt;
 	u8      data[];
 } __attribute__((packed));

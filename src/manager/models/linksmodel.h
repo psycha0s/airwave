@@ -2,8 +2,8 @@
 #define MODELS_LINKSMODEL_H
 
 #include "common/logger.h"
+#include "common/moduleinfo.h"
 #include "common/storage.h"
-#include "core/moduleinfo.h"
 #include "models/generictreemodel.h"
 
 

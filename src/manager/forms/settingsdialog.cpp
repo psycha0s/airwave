@@ -189,7 +189,7 @@ void SettingsDialog::browseForBinariesPath()
 
 	QStringList nameFilters;
 	nameFilters << HOST_BASENAME "-32.exe" << HOST_BASENAME "-64.exe";
-	nameFilters << PLUGIN_BASENAME "-32.so" << PLUGIN_BASENAME "-64.so";
+	nameFilters << PLUGIN_BASENAME ".so";
 	dialog.setNameFilters(nameFilters);
 
 	dialog.setWindowTitle("Select directory containing airwave binaries");

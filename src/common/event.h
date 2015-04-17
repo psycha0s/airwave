@@ -1,5 +1,5 @@
-#ifndef FUTEX_TEST_EVENT_H
-#define FUTEX_TEST_EVENT_H
+#ifndef COMMON_EVENT_H
+#define COMMON_EVENT_H
 
 #include <atomic>
 
@@ -13,6 +13,7 @@ public:
 	static const int kInfinite = -1;
 
 	Event();
+	~Event();
 
 	bool wait(int msecs = kInfinite);
 	void post();
@@ -22,4 +23,4 @@ private:
 };
 
 
-#endif // FUTEX_TEST_EVENT_H
+#endif // COMMON_EVENT_H

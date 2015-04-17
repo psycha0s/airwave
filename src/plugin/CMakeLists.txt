@@ -3,6 +3,7 @@ set(TARGET_NAME ${PLUGIN_BASENAME})
 project(${TARGET_NAME})
 
 find_package(LibDl REQUIRED)
+find_package(LibMagic REQUIRED)
 find_package(Threads REQUIRED)
 find_package(X11 REQUIRED)
 

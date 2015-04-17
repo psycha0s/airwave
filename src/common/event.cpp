@@ -20,6 +20,13 @@ Event::Event() :
 }
 
 
+Event::~Event()
+{
+	// FIXME The current implementation is not correct as it wakes only the one waiter.
+	futex_post(&count_, 1);
+}
+
+
 bool Event::wait(int msecs)
 {
 	timespec* timeout = nullptr;

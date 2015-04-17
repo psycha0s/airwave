@@ -24,19 +24,12 @@ enum class Command {
 
 
 struct DataFrame {
-	Command  command;
-	i32      opcode;
-	i32      index;
-	intptr_t value;
-	float    opt;
-
-#ifdef __i386
-	// The size of a pointer on the x86_64 in two times larger than on the x86. Because
-	// of this, we should use the 32 bits of padding on the x86.
-	void*    padding;
-#endif
-
-	u8       data[];
+	Command command;
+	i32     opcode;
+	i32     index;
+	i64     value;	// The 64-bit value is used here to avoid 64->32 bridging issues
+	float   opt;
+	u8      data[];
 } __attribute__((packed));
 
 

@@ -67,10 +67,9 @@ QStringList Application::checkMissingBinaries(const QString& path) const
 
 	QStringList fileList;
 	fileList += HOST_BASENAME "-32.exe";
-	fileList += PLUGIN_BASENAME "-32.so";
+	fileList += PLUGIN_BASENAME ".so";
 #ifdef PLATFORM_64BIT
 	fileList += HOST_BASENAME "-64.exe";
-	fileList += PLUGIN_BASENAME "-64.so";
 #endif
 
 	QStringList result;

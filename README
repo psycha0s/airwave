@@ -33,7 +33,7 @@ Building the source
   mkdir build && cd build
   cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave -DVSTSDK_PATH=${HOME}/VST3\ SDK ..
   make
-  make install
+  sudo make install
 
 Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
 

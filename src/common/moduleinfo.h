@@ -1,10 +1,8 @@
-#ifndef CORE_MODULEINFO_H
-#define CORE_MODULEINFO_H
+#ifndef COMMON_MODULEINFO_H
+#define COMMON_MODULEINFO_H
 
+#include <string>
 #include <magic.h>
-
-
-class QString;
 
 
 class ModuleInfo {
@@ -22,7 +20,7 @@ public:
 
 	~ModuleInfo();
 
-	Arch getArch(const QString& fileName) const;
+	Arch getArch(const std::string& fileName) const;
 
 private:
 	bool isInitialized_;
@@ -32,4 +30,4 @@ private:
 };
 
 
-#endif // CORE_MODULEINFO_H
+#endif // COMMON_MODULEINFO_H

@@ -13,7 +13,7 @@ LinkItem::LinkItem(Storage::Link link) :
 		QString prefix = QString::fromStdString(storage->prefix(link_.prefix()).path());
 
 		QFileInfo info(QDir(prefix), QString::fromStdString(link_.target()));
-		arch_ = ModuleInfo::instance()->getArch(info.absoluteFilePath());
+		arch_ = ModuleInfo::instance()->getArch(info.absoluteFilePath().toStdString());
 	}
 }
 

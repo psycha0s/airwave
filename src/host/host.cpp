@@ -281,7 +281,7 @@ bool Host::handleDispatch(DataFrame* frame)
 	FLOOD("handleDispatch: %s", kDispatchEvents[frame->opcode]);
 
 	if(isEditorOpen_ && frame->opcode != effEditIdle) {
-		// Delay delay the effEditIdle event by 100 milliseconds
+		// Postpone the effEditIdle event by 100 milliseconds
 		SetTimer(hwnd_, timerId_, 100, nullptr);
 	}
 
@@ -526,9 +526,8 @@ void Host::handleProcessDouble()
 
 intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, float opt)
 {
-	if(opcode != audioMasterGetTime && opcode != audioMasterIdle) {
+	if(opcode != audioMasterGetTime && opcode != audioMasterIdle)
 		FLOOD("handleAudioMaster(%s)", kAudioMasterEvents[opcode]);
-	}
 
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
 	frame->command = Command::AudioMaster;

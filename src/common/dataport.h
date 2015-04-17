@@ -1,7 +1,7 @@
 #ifndef COMMON_DATAPORT_H
 #define COMMON_DATAPORT_H
 
-#include <semaphore.h>
+#include "common/event.h"
 #include "common/types.h"
 
 
@@ -35,16 +35,15 @@ public:
 
 private:
 	struct ControlBlock {
-		sem_t request;
-		sem_t response;
-	} __attribute__((packed));
+		Event request;
+		Event response;
+	};
 
 	int id_;
 	size_t frameSize_;
 	void* buffer_;
 
 	ControlBlock* controlBlock();
-	bool waitForReady(sem_t* semaphore, int msecs = -1);
 };
 
 

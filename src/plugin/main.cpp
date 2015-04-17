@@ -5,6 +5,7 @@
 #include "common/config.h"
 #include "common/filesystem.h"
 #include "common/logger.h"
+#include "common/moduleinfo.h"
 #include "common/storage.h"
 
 
@@ -69,23 +70,6 @@ AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 	TRACE("Initializing plugin endpoint %s", VERSION_STRING);
 	TRACE("Plugin binary: %s", selfPath.c_str());
 
-	// Find host binary path
-	std::string hostName;
-	if(sizeof(void*) == 8) {
-		hostName = HOST_BASENAME "-64.exe";
-	}
-	else {
-		hostName = HOST_BASENAME "-32.exe";
-	}
-
-	std::string hostPath = FileSystem::realPath(storage.binariesPath() + '/' + hostName);
-	if(!FileSystem::isFileExists(hostPath)) {
-		ERROR("Host binary '%s' doesn't exists", hostPath.c_str());
-		return nullptr;
-	}
-
-	TRACE("Host binary:   %s", hostPath.c_str());
-
 	std::string winePrefix = link.prefix();
 	Storage::Prefix prefix = storage.prefix(winePrefix);
 	if(!prefix) {
@@ -123,6 +107,29 @@ AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 	}
 
 	TRACE("VST binary:    %s", vstPath.c_str());
+
+	// Find host binary path
+	ModuleInfo::Arch arch = ModuleInfo::instance()->getArch(vstPath);
+
+	std::string hostName;
+	if(arch == ModuleInfo::kArch64) {
+		hostName = HOST_BASENAME "-64.exe";
+	}
+	else if(arch == ModuleInfo::kArch32) {
+		hostName = HOST_BASENAME "-32.exe";
+	}
+	else {
+		ERROR("Unable to determine VST plugin architecture");
+		return nullptr;
+	}
+
+	std::string hostPath = FileSystem::realPath(storage.binariesPath() + '/' + hostName);
+	if(!FileSystem::isFileExists(hostPath)) {
+		ERROR("Host binary '%s' doesn't exists", hostPath.c_str());
+		return nullptr;
+	}
+
+	TRACE("Host binary:   %s", hostPath.c_str());
 
 	// We process only two cases, because messages with log levels lower than 'trace'
 	// wouldn't be logged anyway.

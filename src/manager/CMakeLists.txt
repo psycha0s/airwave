@@ -19,10 +19,10 @@ set(SOURCES
 	main.cpp
 	../common/filesystem.cpp
 	../common/json.cpp
+	../common/moduleinfo.cpp
 	../common/storage.cpp
 	core/application.cpp
 	core/logsocket.cpp
-	core/moduleinfo.cpp
 	core/singleapplication.cpp
 	forms/filedialog.cpp
 	forms/folderdialog.cpp

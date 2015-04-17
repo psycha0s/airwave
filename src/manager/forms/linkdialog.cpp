@@ -9,7 +9,6 @@
 #include <QSettings>
 #include "common/config.h"
 #include "core/application.h"
-#include "core/moduleinfo.h"
 #include "forms/filedialog.h"
 #include "models/linksmodel.h"
 #include "models/loadersmodel.h"

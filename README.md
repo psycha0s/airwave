@@ -75,7 +75,7 @@ The following list is not complete. It contains only plugins, that have been tes
 
  VST-Plugins | works? | Notes |
 ------------:|:----------:|:-------|
- AlgoMusic CZythia | yes |
+ AlgoMusic CZynthia | yes |
  Aly James LAB OB-Xtreme | yes |
  Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine
  Credland Audio BigKick | no | doesn't work with wine
@@ -106,6 +106,7 @@ The following list is not complete. It contains only plugins, that have been tes
  Smartelectronix s(M)exoscope | yes |
  SQ8L by Siegfried Kullmann | yes |
  SuperWave P8 | yes |
+ Synapse Audio DUNE 2 | yes |
  Synth1 by Ichiro Toda | yes |
  Tone2 FireBird | yes |
  Tone2 Nemesis | yes |

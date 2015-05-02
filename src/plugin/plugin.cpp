@@ -197,6 +197,7 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterGetOutputLatency:
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
+	case audioMasterCurrentId:
 		return masterProc_(effect_, frame->opcode, frame->index, frame->value,	nullptr,
 				frame->opt);
 
@@ -226,7 +227,7 @@ intptr_t Plugin::handleAudioMaster()
 		return masterProc_(effect_, frame->opcode, 0, 0, e, 0.0f); }
 	}
 
-	ERROR("Unhandled audio master event: %s", kAudioMasterEvents[frame->opcode]);
+	ERROR("Unhandled audio master event: %s %d", kAudioMasterEvents[frame->opcode], frame->opcode);
 	return 0;
 }
 
@@ -269,6 +270,10 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 	case effGetNumMidiOutputChannels:
 	case effSetPanLaw:
 	case effGetTailSize:
+//	case __effConnectInputDeprecated:
+//	case __effConnectOutputDeprecated:
+//	case __effKeysRequiredDeprecated:
+//	case __effIdentifyDeprecated:
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;
@@ -398,7 +403,8 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		return frame->value; }
 
 	case effGetVendorString:
-	case effGetProductString: {
+	case effGetProductString:
+	case effShellGetNextPlugin: {
 		port->sendRequest();
 		port->waitResponse();
 

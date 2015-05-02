@@ -315,6 +315,10 @@ bool Host::handleDispatch(DataFrame* frame)
 	case effEndSetProgram:
 	case effStopProcess:
 	case effGetTailSize:
+//	case __effConnectInputDeprecated:
+//	case __effConnectOutputDeprecated:
+//	case __effKeysRequiredDeprecated:
+//	case __effIdentifyDeprecated:
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				frame->value, nullptr, frame->opt);
 		break;
@@ -425,6 +429,7 @@ bool Host::handleDispatch(DataFrame* frame)
 	case effBeginLoadBank:
 	case effBeginLoadProgram:
 	case effGetEffectName:
+	case effShellGetNextPlugin:
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				frame->value, frame->data, frame->opt);
 		break;
@@ -549,6 +554,7 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterGetOutputLatency:
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
+	case audioMasterCurrentId:
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;

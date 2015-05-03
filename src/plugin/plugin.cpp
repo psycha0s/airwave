@@ -272,10 +272,10 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 	case effGetNumMidiOutputChannels:
 	case effSetPanLaw:
 	case effGetTailSize:
-//	case __effConnectInputDeprecated:
-//	case __effConnectOutputDeprecated:
-//	case __effKeysRequiredDeprecated:
-//	case __effIdentifyDeprecated:
+	case __effConnectInputDeprecated:
+	case __effConnectOutputDeprecated:
+	case __effKeysRequiredDeprecated:
+	case __effIdentifyDeprecated:
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;

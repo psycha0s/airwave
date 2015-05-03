@@ -316,10 +316,10 @@ bool Host::handleDispatch(DataFrame* frame)
 	case effEndSetProgram:
 	case effStopProcess:
 	case effGetTailSize:
-//	case __effConnectInputDeprecated:
-//	case __effConnectOutputDeprecated:
-//	case __effKeysRequiredDeprecated:
-//	case __effIdentifyDeprecated:
+	case __effConnectInputDeprecated:
+	case __effConnectOutputDeprecated:
+	case __effKeysRequiredDeprecated:
+	case __effIdentifyDeprecated:
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				frame->value, nullptr, frame->opt);
 		break;

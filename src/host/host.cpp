@@ -134,6 +134,7 @@ bool Host::initialize(const char* fileName, int portId)
 	info->paramCount   = effect_->numParams;
 	info->inputCount   = effect_->numInputs;
 	info->outputCount  = effect_->numOutputs;
+	info->initialDelay = effect_->initialDelay;
 	info->uniqueId     = effect_->uniqueID;
 	info->version      = effect_->version;
 
@@ -555,6 +556,7 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
+//	case audioMasterUpdateDisplay:
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;

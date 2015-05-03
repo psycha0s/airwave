@@ -110,6 +110,7 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 	effect_->numParams              = info->paramCount;
 	effect_->numInputs              = info->inputCount;
 	effect_->numOutputs             = info->outputCount;
+	effect_->initialDelay           = info->initialDelay;
 	effect_->uniqueID               = info->uniqueId;
 	effect_->version                = info->version;
 
@@ -119,6 +120,7 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 	DEBUG("  param count:   %d",     effect_->numParams);
 	DEBUG("  input count:   %d",     effect_->numInputs);
 	DEBUG("  output count:  %d",     effect_->numOutputs);
+	DEBUG("  initial delay: %d",     effect_->initialDelay);
 	DEBUG("  unique ID:     0x%08X", effect_->uniqueID);
 	DEBUG("  version:       %d",     effect_->version);
 }

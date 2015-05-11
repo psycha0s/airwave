@@ -272,6 +272,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 	case effGetNumMidiOutputChannels:
 	case effSetPanLaw:
 	case effGetTailSize:
+	case effSetEditKnobMode:
 	case __effConnectInputDeprecated:
 	case __effConnectOutputDeprecated:
 	case __effKeysRequiredDeprecated:
@@ -331,7 +332,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		XSync(display, false);
 
 		// FIXME without this delay, the VST window sometimes stays black.
-		usleep(100000);
+//		usleep(100000);
 
 		Window child = frame->value;
 		XReparentWindow(display, child, parent, 0, 0);
@@ -344,7 +345,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		port->waitResponse();
 
 		// FIXME without this delay, the VST window sometimes stays black.
-		usleep(100000);
+//		usleep(100000);
 
 		XMapWindow(display, child);
 		XSync(display, false);
@@ -587,6 +588,20 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;
+
+	case effSetSpeakerArrangement: {
+		void* pluginInput = reinterpret_cast<void*>(value);
+		void* pluginOutput = ptr;
+
+		u8* data = frame->data;
+		std::memcpy(data, pluginInput, sizeof(VstSpeakerArrangement));
+
+		data += sizeof(VstSpeakerArrangement);
+		std::memcpy(data, pluginOutput, sizeof(VstSpeakerArrangement));
+
+		port->sendRequest();
+		port->waitResponse();
+		return frame->value; }
 	}
 
 	ERROR("Unhandled dispatch event: %s", kDispatchEvents[opcode]);

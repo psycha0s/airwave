@@ -316,6 +316,7 @@ bool Host::handleDispatch(DataFrame* frame)
 	case effEndSetProgram:
 	case effStopProcess:
 	case effGetTailSize:
+	case effSetEditKnobMode:
 	case __effConnectInputDeprecated:
 	case __effConnectOutputDeprecated:
 	case __effKeysRequiredDeprecated:
@@ -470,6 +471,17 @@ bool Host::handleDispatch(DataFrame* frame)
 		chunk_.clear();
 		break; }
 
+	case effSetSpeakerArrangement: {
+		u8* data = frame->data;
+
+		intptr_t value = reinterpret_cast<intptr_t>(data);
+		void* ptr = data + sizeof(VstSpeakerArrangement);
+
+		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index, value,
+			ptr, frame->opt);
+
+		break; }
+
 	default:
 		ERROR("Unhandled dispatch event: %s", kDispatchEvents[frame->opcode]);
 	}
@@ -562,7 +574,7 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 		return frame->value;
 
 	// FIXME Passing the audioMasterUpdateDisplay request to the plugin endpoint leads to
-	// crash with some plugins.
+	// crash (or lock in Renoise) with some plugins (u-he TripleCheese).
 //	case audioMasterUpdateDisplay:
 //		return 1;
 

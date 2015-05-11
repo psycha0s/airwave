@@ -568,15 +568,14 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
-	case audioMasterUpdateDisplay:
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;
 
 	// FIXME Passing the audioMasterUpdateDisplay request to the plugin endpoint leads to
 	// crash (or lock in Renoise) with some plugins (u-he TripleCheese).
-//	case audioMasterUpdateDisplay:
-//		return 1;
+	case audioMasterUpdateDisplay:
+		return 1;
 
 	case audioMasterIdle:
 	case __audioMasterNeedIdleDeprecated:

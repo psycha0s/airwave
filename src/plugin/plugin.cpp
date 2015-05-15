@@ -110,6 +110,7 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 	effect_->numParams              = info->paramCount;
 	effect_->numInputs              = info->inputCount;
 	effect_->numOutputs             = info->outputCount;
+	effect_->initialDelay           = info->initialDelay;
 	effect_->uniqueID               = info->uniqueId;
 	effect_->version                = info->version;
 
@@ -119,6 +120,7 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 	DEBUG("  param count:   %d",     effect_->numParams);
 	DEBUG("  input count:   %d",     effect_->numInputs);
 	DEBUG("  output count:  %d",     effect_->numOutputs);
+	DEBUG("  initial delay: %d",     effect_->initialDelay);
 	DEBUG("  unique ID:     0x%08X", effect_->uniqueID);
 	DEBUG("  version:       %d",     effect_->version);
 }
@@ -197,6 +199,7 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterGetOutputLatency:
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
+	case audioMasterCurrentId:
 		return masterProc_(effect_, frame->opcode, frame->index, frame->value,	nullptr,
 				frame->opt);
 
@@ -226,7 +229,7 @@ intptr_t Plugin::handleAudioMaster()
 		return masterProc_(effect_, frame->opcode, 0, 0, e, 0.0f); }
 	}
 
-	ERROR("Unhandled audio master event: %s", kAudioMasterEvents[frame->opcode]);
+	ERROR("Unhandled audio master event: %s %d", kAudioMasterEvents[frame->opcode], frame->opcode);
 	return 0;
 }
 
@@ -269,6 +272,11 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 	case effGetNumMidiOutputChannels:
 	case effSetPanLaw:
 	case effGetTailSize:
+	case effSetEditKnobMode:
+	case __effConnectInputDeprecated:
+	case __effConnectOutputDeprecated:
+	case __effKeysRequiredDeprecated:
+	case __effIdentifyDeprecated:
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;
@@ -398,7 +406,8 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		return frame->value; }
 
 	case effGetVendorString:
-	case effGetProductString: {
+	case effGetProductString:
+	case effShellGetNextPlugin: {
 		port->sendRequest();
 		port->waitResponse();
 
@@ -579,6 +588,20 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;
+
+	case effSetSpeakerArrangement: {
+		void* pluginInput = reinterpret_cast<void*>(value);
+		void* pluginOutput = ptr;
+
+		u8* data = frame->data;
+		std::memcpy(data, pluginInput, sizeof(VstSpeakerArrangement));
+
+		data += sizeof(VstSpeakerArrangement);
+		std::memcpy(data, pluginOutput, sizeof(VstSpeakerArrangement));
+
+		port->sendRequest();
+		port->waitResponse();
+		return frame->value; }
 	}
 
 	ERROR("Unhandled dispatch event: %s", kDispatchEvents[opcode]);

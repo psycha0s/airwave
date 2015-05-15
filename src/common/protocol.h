@@ -39,6 +39,7 @@ struct PluginInfo {
 	i32 paramCount;
 	i32 inputCount;
 	i32 outputCount;
+	i32 initialDelay;
 	i32 uniqueId;
 	i32 version;
 } __attribute__((packed));

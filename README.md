@@ -77,9 +77,13 @@ The following list is not complete. It contains only plugins, that have been tes
 ------------:|:----------:|:-------|
  AlgoMusic CZynthia | yes |
  Aly James LAB OB-Xtreme | yes |
+ Analogic Delay by interrruptor | yes |
+ Bionic Delay by interrruptor | yes |
  Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine
+ Cableguys Kickstart | no | doesn't work with wine
+ Cableguys Volume Shaper | no | doesn't work with wine
  Credland Audio BigKick | no | doesn't work with wine
- FabFilter Total bundle | yes | haven't tested them all
+ FabFilter plugins | yes | haven't tested them all
  Green Oak Software Crystal | yes |
  Image-Line Harmless | yes |
  Image-Line Sytrus | yes |
@@ -94,7 +98,7 @@ The following list is not complete. It contains only plugins, that have been tes
  Magnus Choir | yes |
  Martin Lüders pg8x | yes |
  Meesha Damatriks | yes |
- Odo Synths Double Six | partly | GUI doesn't show, but presets are available and functional
+ Odo Synths Double Six | partly | GUI issues
  Peavey Revalver Mark III.V | yes |
  ReFX Nexus2 | yes |
  ReFX Vanguard | yes |
@@ -104,6 +108,7 @@ The following list is not complete. It contains only plugins, that have been tes
  Sonic Cat LFX-1310 | yes |
  Sonic Charge Cyclone | yes |
  Smartelectronix s(M)exoscope | yes |
+ Spectrasonics Omnisphere | yes |
  SQ8L by Siegfried Kullmann | yes |
  SuperWave P8 | yes |
  Synapse Audio DUNE 2 | yes |
@@ -111,15 +116,7 @@ The following list is not complete. It contains only plugins, that have been tes
  Tone2 FireBird | yes |
  Tone2 Nemesis | yes |
  Tone2 Saurus | yes |
- u-he A.C.E. | yes | Linux version is also available
- u-he Bazille | yes | Linux version is also available
- u-he Diva | yes | Linux version is also available
- u-he Hive | yes | Linux version is also available
- u-he Presswerk | yes | Linux version is also available
- u-he Satin | yes | Linux version is also available
- u-he Uhbik | yes | Linux version is also available
- u-he Zebra2 | yes | Linux version is also available
+ u-he plugins | yes | Linux version is also available
  Variety of Sound plugins | yes |
- Voxengo SPAN | yes |
- Voxengo SPAN Pro | mostly | inter plugin routing doesn't work (architecture issue)
+ Voxengo plugins | mostly | inter plugin routing doesn't work (architecture issue)
  Xfer Serum | no | the GUI doesn't appear (wine issue), but audio works

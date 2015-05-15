@@ -113,7 +113,7 @@ bool Host::initialize(const char* fileName, int portId)
 	TRACE("Initializing VST plugin...");
 
 	effect_ = vstMainProc(audioMasterProc);
-	if(!effect_) {
+	if(!effect_ || effect_->magic != kEffectMagic) {
 		ERROR("Unable to initialize VST plugin");
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
@@ -134,8 +134,16 @@ bool Host::initialize(const char* fileName, int portId)
 	info->paramCount   = effect_->numParams;
 	info->inputCount   = effect_->numInputs;
 	info->outputCount  = effect_->numOutputs;
+	info->initialDelay = effect_->initialDelay;
 	info->uniqueId     = effect_->uniqueID;
 	info->version      = effect_->version;
+
+	// Workaround for plugins from Waves
+	char vendorName[kVstMaxVendorStrLen];
+	if(effect_->dispatcher(effect_, effGetVendorString, 0, 0, &vendorName, 0.0f)) {
+		if(strncmp(vendorName, "Waves", kVstMaxVendorStrLen) == 0)
+			info->flags |= effFlagsHasEditor;
+	}
 
 	controlPort_.sendResponse();
 
@@ -315,6 +323,11 @@ bool Host::handleDispatch(DataFrame* frame)
 	case effEndSetProgram:
 	case effStopProcess:
 	case effGetTailSize:
+	case effSetEditKnobMode:
+	case __effConnectInputDeprecated:
+	case __effConnectOutputDeprecated:
+	case __effKeysRequiredDeprecated:
+	case __effIdentifyDeprecated:
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				frame->value, nullptr, frame->opt);
 		break;
@@ -425,6 +438,7 @@ bool Host::handleDispatch(DataFrame* frame)
 	case effBeginLoadBank:
 	case effBeginLoadProgram:
 	case effGetEffectName:
+	case effShellGetNextPlugin:
 		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index,
 				frame->value, frame->data, frame->opt);
 		break;
@@ -462,6 +476,17 @@ bool Host::handleDispatch(DataFrame* frame)
 				chunk_.size(), chunk_.data(), frame->opt);
 
 		chunk_.clear();
+		break; }
+
+	case effSetSpeakerArrangement: {
+		u8* data = frame->data;
+
+		intptr_t value = reinterpret_cast<intptr_t>(data);
+		void* ptr = data + sizeof(VstSpeakerArrangement);
+
+		frame->value = effect_->dispatcher(effect_, frame->opcode, frame->index, value,
+			ptr, frame->opt);
+
 		break; }
 
 	default:
@@ -549,12 +574,13 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterGetOutputLatency:
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
+	case audioMasterCurrentId:
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;
 
 	// FIXME Passing the audioMasterUpdateDisplay request to the plugin endpoint leads to
-	// crash with some plugins.
+	// crash (or lock in Renoise) with some plugins (u-he TripleCheese).
 	case audioMasterUpdateDisplay:
 		return 1;
 

@@ -113,7 +113,7 @@ bool Host::initialize(const char* fileName, int portId)
 	TRACE("Initializing VST plugin...");
 
 	effect_ = vstMainProc(audioMasterProc);
-	if(!effect_) {
+	if(!effect_ || effect_->magic != kEffectMagic) {
 		ERROR("Unable to initialize VST plugin");
 		controlPort_.disconnect();
 		callbackPort_.disconnect();
@@ -137,6 +137,13 @@ bool Host::initialize(const char* fileName, int portId)
 	info->initialDelay = effect_->initialDelay;
 	info->uniqueId     = effect_->uniqueID;
 	info->version      = effect_->version;
+
+	// Workaround for plugins from Waves
+	char vendorName[kVstMaxVendorStrLen];
+	if(effect_->dispatcher(effect_, effGetVendorString, 0, 0, &vendorName, 0.0f)) {
+		if(strncmp(vendorName, "Waves", kVstMaxVendorStrLen) == 0)
+			info->flags |= effFlagsHasEditor;
+	}
 
 	controlPort_.sendResponse();
 

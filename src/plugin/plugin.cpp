@@ -332,7 +332,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		XSync(display, false);
 
 		// FIXME without this delay, the VST window sometimes stays black.
-//		usleep(100000);
+		usleep(100000);
 
 		Window child = frame->value;
 		XReparentWindow(display, child, parent, 0, 0);
@@ -345,7 +345,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		port->waitResponse();
 
 		// FIXME without this delay, the VST window sometimes stays black.
-//		usleep(100000);
+		usleep(100000);
 
 		XMapWindow(display, child);
 		XSync(display, false);

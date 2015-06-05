@@ -128,12 +128,12 @@ public:
 
 	void sortChildren(LessThanProc lessThan);
 
-protected:
 	/**
 	 * Возвращает @c true, если информация о дочерних элементах не была получена.
 	 */
 	bool canFetchMore() const;
 
+protected:
 	/**
 	 * Устанавливает признак возможности получения информации о дочерних элементах.
 	 */
@@ -219,8 +219,6 @@ private:
 };
 
 
-
-
 template<typename T>
 class GenericTreeModel : public QAbstractItemModel {
 public:
@@ -261,14 +259,14 @@ public:
 	 */
 	T* root() const;
 
-	QModelIndex index(int row, int column,
+	virtual QModelIndex index(int row, int column,
 			const QModelIndex& parent = QModelIndex()) const;
 
-	QModelIndex parent(const QModelIndex& index = QModelIndex()) const;
+	virtual QModelIndex parent(const QModelIndex& index = QModelIndex()) const;
 
-	int rowCount(const QModelIndex& parent = QModelIndex()) const;
+	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
-	bool hasChildren(const QModelIndex& parent = QModelIndex()) const;
+	virtual bool hasChildren(const QModelIndex& parent = QModelIndex()) const;
 
 	virtual bool canFetchMore(const QModelIndex& parent = QModelIndex()) const;
 
@@ -454,7 +452,7 @@ void GenericTreeItem<Derived>::insertChild(Derived* item, int row)
 		model_->beginInsert(item->parent_, item->row_);
 
 	for(int i = item->row_; i < children_.count(); ++i)
-		item->children_[i]->row_++;
+		children_[i]->row_++;
 
 	children_.insert(item->row_, item);
 

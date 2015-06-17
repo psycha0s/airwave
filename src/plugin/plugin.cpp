@@ -193,7 +193,6 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterEndEdit:
 	case audioMasterUpdateDisplay:
 	case audioMasterGetVendorVersion:
-	case audioMasterIOChanged:
 	case audioMasterSizeWindow:
 	case audioMasterGetInputLatency:
 	case audioMasterGetOutputLatency:
@@ -202,6 +201,20 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterCurrentId:
 		return masterProc_(effect_, frame->opcode, frame->index, frame->value,	nullptr,
 				frame->opt);
+
+	case audioMasterIOChanged: {
+		PluginInfo* info = reinterpret_cast<PluginInfo*>(frame->data);
+		effect_->flags        = info->flags;
+		effect_->numPrograms  = info->programCount;
+		effect_->numParams    = info->paramCount;
+		effect_->numInputs    = info->inputCount;
+		effect_->numOutputs   = info->outputCount;
+		effect_->initialDelay = info->initialDelay;
+		effect_->uniqueID     = info->uniqueId;
+		effect_->version      = info->version;
+
+		return masterProc_(effect_, frame->opcode, frame->index, frame->value,	nullptr,
+				frame->opt); }
 
 	case audioMasterGetVendorString:
 	case audioMasterGetProductString:

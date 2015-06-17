@@ -568,7 +568,6 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterBeginEdit:
 	case audioMasterEndEdit:
 	case audioMasterGetVendorVersion:
-	case audioMasterIOChanged:
 	case audioMasterSizeWindow:
 	case audioMasterGetInputLatency:
 	case audioMasterGetOutputLatency:
@@ -578,6 +577,21 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;
+
+	case audioMasterIOChanged: {
+		PluginInfo* info = reinterpret_cast<PluginInfo*>(frame->data);
+		info->flags        = effect_->flags;
+		info->programCount = effect_->numPrograms;
+		info->paramCount   = effect_->numParams;
+		info->inputCount   = effect_->numInputs;
+		info->outputCount  = effect_->numOutputs;
+		info->initialDelay = effect_->initialDelay;
+		info->uniqueId     = effect_->uniqueID;
+		info->version      = effect_->version;
+
+		callbackPort_.sendRequest();
+		callbackPort_.waitResponse();
+		return frame->value; }
 
 	// FIXME Passing the audioMasterUpdateDisplay request to the plugin endpoint leads to
 	// crash (or lock in Renoise) with some plugins (u-he TripleCheese).

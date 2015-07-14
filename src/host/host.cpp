@@ -50,7 +50,7 @@ bool Host::initialize(const char* fileName, int portId)
 
 	module_ = LoadLibrary(fileName);
 	if(!module_) {
-		ERROR("Unable to load '%s' shared library: %s", errorString().c_str());
+		ERROR("Unable to load '%s' shared library: %s", fileName, errorString().c_str());
 		return false;
 	}
 

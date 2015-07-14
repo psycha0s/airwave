@@ -199,7 +199,7 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
-		return masterProc_(effect_, frame->opcode, frame->index, frame->value,	nullptr,
+		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
 				frame->opt);
 
 	case audioMasterIOChanged: {
@@ -213,7 +213,7 @@ intptr_t Plugin::handleAudioMaster()
 		effect_->uniqueID     = info->uniqueId;
 		effect_->version      = info->version;
 
-		return masterProc_(effect_, frame->opcode, frame->index, frame->value,	nullptr,
+		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
 				frame->opt); }
 
 	case audioMasterGetVendorString:
@@ -242,7 +242,9 @@ intptr_t Plugin::handleAudioMaster()
 		return masterProc_(effect_, frame->opcode, 0, 0, e, 0.0f); }
 	}
 
-	ERROR("Unhandled audio master event: %s %d", kAudioMasterEvents[frame->opcode], frame->opcode);
+	ERROR("Unhandled audio master event: %s %d", kAudioMasterEvents[frame->opcode],
+			frame->opcode);
+
 	return 0;
 }
 

@@ -120,3 +120,4 @@ The following list is not complete. It contains only plugins, that have been tes
  Variety of Sound plugins | yes |
  Voxengo plugins | mostly | inter plugin routing doesn't work (architecture issue)
  Xfer Serum | no | the GUI doesn't appear (wine issue), but audio works
+ EZDrummer2, BFD3, XLN AD2 | no | EZD2 works under REAPER in WINE 

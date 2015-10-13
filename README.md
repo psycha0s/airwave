@@ -68,7 +68,7 @@ The bridge consists of four components:
 When the airwave-plugin is loaded by the VST host, it obtains its absolute path and use it as the key to get the linked VST DLL from the configuration. Then it starts the airwave-host process and passes the path to the linked VST file. The airwave-host loads the VST DLL and works as a fake VST host. Starting from this point, the airwave-plugin and airwave-host act together like a proxy, translating commands between the native VST host and the Windows VST plugin.
 
 ## Known issues
-- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. You can workaround this issue by patching WINE with [this patch patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch)
+- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. You can workaround this issue by patching WINE with [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch).
 
 ## Compatibility
 The following list is not complete. It contains only plugins, that have been tested by me or by people, who sent me a report.

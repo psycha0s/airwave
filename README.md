@@ -4,7 +4,7 @@ Due to the use of shared memory, only one extra copying is made for each data tr
 
 ## Requirements
 - WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
-but earlier versions also may work)
+but earlier versions also may work). To solve the blank window issue you can apply [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch) to WINE.
 - libmagic
 - Qt5 for the airwave manager application (GUI)
 
@@ -68,7 +68,7 @@ The bridge consists of four components:
 When the airwave-plugin is loaded by the VST host, it obtains its absolute path and use it as the key to get the linked VST DLL from the configuration. Then it starts the airwave-host process and passes the path to the linked VST file. The airwave-host loads the VST DLL and works as a fake VST host. Starting from this point, the airwave-plugin and airwave-host act together like a proxy, translating commands between the native VST host and the Windows VST plugin.
 
 ## Known issues
-- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. On some hosts (Bitwig Studio for example) this can be solved by closing and re-opening the plugin window.
+- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. You can workaround this issue by patching WINE with [this patch patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch)
 
 ## Compatibility
 The following list is not complete. It contains only plugins, that have been tested by me or by people, who sent me a report.

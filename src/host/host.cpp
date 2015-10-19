@@ -371,8 +371,8 @@ bool Host::handleDispatch(DataFrame* frame)
 		wclass.cbClsExtra    = 0;
 		wclass.cbWndExtra    = 0;
 		wclass.hInstance     = GetModuleHandle(nullptr);
-		wclass.hIcon         = LoadIcon(GetModuleHandle(nullptr), kWindowClass);
-		wclass.hCursor       = LoadCursor(0, IDI_APPLICATION);
+		wclass.hIcon         = LoadIcon(nullptr, kWindowClass);
+		wclass.hCursor       = LoadCursor(nullptr, IDC_ARROW);
 		wclass.lpszClassName = kWindowClass;
 
 		if(!RegisterClassEx(&wclass)) {

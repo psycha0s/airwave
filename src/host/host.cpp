@@ -159,7 +159,7 @@ bool Host::processRequest()
 		return false;
 	}
 
-	if(!controlPort_.waitRequest(20))
+	if(!controlPort_.waitRequest(10))
 		return true;
 
 	bool result = true;
@@ -168,14 +168,6 @@ bool Host::processRequest()
 	switch(frame->command) {
 	case Command::Dispatch:
 		result = handleDispatch(frame);
-		break;
-
-	case Command::GetParameter:
-		handleGetParameter();
-		break;
-
-	case Command::SetParameter:
-		handleSetParameter();
 		break;
 
 	case Command::GetDataBlock:
@@ -244,11 +236,17 @@ void Host::audioThread()
 	condition_.post();
 
 	while(runAudio_.test_and_set()) {
-		if(audioPort_.waitRequest(50)) {
+		if(audioPort_.waitRequest(100)) {
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
 			if(frame->command == Command::ProcessSingle) {
 				handleProcessSingle();
+			}
+			else if(frame->command == Command::GetParameter) {
+				handleGetParameter();
+			}
+			else if(frame->command == Command::SetParameter) {
+				handleSetParameter();
 			}
 			else if(frame->command == Command::ProcessDouble) {
 				handleProcessDouble();
@@ -290,7 +288,7 @@ bool Host::handleDispatch(DataFrame* frame)
 
 	if(isEditorOpen_ && frame->opcode != effEditIdle) {
 		// Postpone the effEditIdle event by 100 milliseconds
-		SetTimer(hwnd_, timerId_, 100, nullptr);
+		SetTimer(hwnd_, timerId_, 200, nullptr);
 	}
 
 	switch(frame->opcode) {
@@ -406,7 +404,7 @@ bool Host::handleDispatch(DataFrame* frame)
 
 		std::memcpy(&frame->data, rect, sizeof(ERect));
 
-		timerId_ = SetTimer(hwnd_, 0, 100, nullptr);
+		timerId_ = SetTimer(hwnd_, 0, 200, nullptr);
 
 		HANDLE handle = GetPropA(hwnd_, "__wine_x11_whole_window");
 		frame->value = reinterpret_cast<intptr_t>(handle);
@@ -499,14 +497,16 @@ bool Host::handleDispatch(DataFrame* frame)
 
 void Host::handleGetParameter()
 {
-	DataFrame* frame = controlPort_.frame<DataFrame>();
+//	DataFrame* frame = controlPort_.frame<DataFrame>();
+	DataFrame* frame = audioPort_.frame<DataFrame>();
 	frame->opt = effect_->getParameter(effect_, frame->index);
 }
 
 
 void Host::handleSetParameter()
 {
-	DataFrame* frame = controlPort_.frame<DataFrame>();
+//	DataFrame* frame = controlPort_.frame<DataFrame>();
+	DataFrame* frame = audioPort_.frame<DataFrame>();
 	effect_->setParameter(effect_, frame->index, frame->opt);
 }
 

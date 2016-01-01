@@ -288,7 +288,7 @@ bool Host::handleDispatch(DataFrame* frame)
 
 	if(isEditorOpen_ && frame->opcode != effEditIdle) {
 		// Postpone the effEditIdle event by 100 milliseconds
-		SetTimer(hwnd_, timerId_, 200, nullptr);
+		SetTimer(hwnd_, timerId_, 100, nullptr);
 	}
 
 	switch(frame->opcode) {
@@ -404,7 +404,7 @@ bool Host::handleDispatch(DataFrame* frame)
 
 		std::memcpy(&frame->data, rect, sizeof(ERect));
 
-		timerId_ = SetTimer(hwnd_, 0, 200, nullptr);
+		timerId_ = SetTimer(hwnd_, 0, 100, nullptr);
 
 		HANDLE handle = GetPropA(hwnd_, "__wine_x11_whole_window");
 		frame->value = reinterpret_cast<intptr_t>(handle);

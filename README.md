@@ -102,7 +102,7 @@ The following list is not complete. It contains only plugins, that have been tes
  Peavey Revalver Mark III.V | yes |
  ReFX Nexus2 | yes |
  ReFX Vanguard | yes |
- Reveal Sound Spire | yes | starting form 1.0.19 the GUI doesn't appear (wine issue)
+ Reveal Sound Spire | yes | starting form 1.0.19 you need to override d2d1.dll in winecfg
  Sonic Academy A.N.A. | yes |
  Sonic Academy KICK | yes |
  Sonic Cat LFX-1310 | yes |

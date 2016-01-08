@@ -202,9 +202,11 @@ std::string Host::errorString() const
 
 	if(error) {
 		LPVOID buffer;
-		DWORD length = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr,
-				error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		DWORD flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS;
+
+		DWORD length = FormatMessage(flags, nullptr, error,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 				reinterpret_cast<LPTSTR>(&buffer), 0, nullptr);
 
 		if(length) {

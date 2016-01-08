@@ -596,6 +596,8 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	// FIXME Passing the audioMasterUpdateDisplay request to the plugin endpoint leads to
 	// crash (or lock in Renoise) with some plugins (u-he TripleCheese).
 	case audioMasterUpdateDisplay:
+//		callbackPort_.sendRequest();
+//		callbackPort_.waitResponse();
 		return 1;
 
 	case audioMasterIdle:

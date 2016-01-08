@@ -574,11 +574,15 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
+	case audioMasterGetSampleRate:
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;
 
 	case audioMasterIOChanged: {
+		if(!isInitialized_)
+			return 0;
+
 		PluginInfo* info = reinterpret_cast<PluginInfo*>(frame->data);
 		info->flags        = effect_->flags;
 		info->programCount = effect_->numPrograms;

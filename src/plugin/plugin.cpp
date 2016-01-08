@@ -199,6 +199,7 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
+	case audioMasterGetSampleRate:
 		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
 				frame->opt);
 

@@ -7,9 +7,9 @@
 #include "common/protocol.h"
 
 
-#define XEMBED_EMBEDDED_NOTIFY 0
-#define XEMBED_FOCUS_OUT       5
-
+#define XEMBED_EMBEDDED_NOTIFY	0
+#define XEMBED_FOCUS_OUT		5
+#define kVstExtMaxParamStrLen	24
 
 namespace Airwave {
 
@@ -391,8 +391,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		char* dest         = reinterpret_cast<char*>(frame->data);
 		size_t maxLength   = port->frameSize() - sizeof(DataFrame);
 
-		std::strncpy(dest, source, maxLength);
-		dest[maxLength-1] = '\0';
+		vst_strncpy(dest, source, maxLength);
 
 		port->sendRequest();
 		port->waitResponse();
@@ -405,16 +404,14 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxProgNameLen);
 		return frame->value; }
 
 	case effSetProgramName: {
 		const char* source = static_cast<const char*>(ptr);
 		char* dest         = reinterpret_cast<char*>(frame->data);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxProgNameLen);
 
 		port->sendRequest();
 		port->waitResponse();
@@ -429,8 +426,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxVendorStrLen);
-		dest[kVstMaxVendorStrLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxVendorStrLen);
 		return frame->value; }
 
 	case effGetParamName:
@@ -442,14 +438,16 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-//		std::strncpy(dest, source, kVstMaxParamStrLen);
-//		dest[kVstMaxParamStrLen-1] = '\0';
+//		vst_strncpy(dest, source, kVstMaxParamStrLen);
+//		vst_strncpy(dest, source, kVstExtMaxParamStrLen);
 
 		// Workaround for Variety of Sound plugins bug (non-printable characters)
 		int i;
-		for(i = 0; i < kVstMaxParamStrLen - 1; ++i) {
-			if(isprint(source[i]))
-				dest[i] = source[i];
+		for(i = 0; i < kVstExtMaxParamStrLen - 1; ++i) {
+			if(!isprint(source[i]))
+				break;
+
+			dest[i] = source[i];
 		}
 
 		dest[i] = '\0';
@@ -462,8 +460,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxEffectNameLen);
-		dest[kVstMaxEffectNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxEffectNameLen);
 		return frame->value; }
 
 	case effGetParameterProperties:
@@ -488,8 +485,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxProgNameLen);
 		return frame->value; }
 
 	case effGetMidiKeyName:

@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Version=@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
+Version=1.0
 Name=Airwave manager
 Comment=A tool for managing the Airwave VST bridge
 Exec=@TARGET_NAME@

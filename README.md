@@ -80,9 +80,8 @@ The following list is not complete. It contains only plugins, that have been tes
  Analogic Delay by interrruptor | yes |
  Bionic Delay by interrruptor | yes |
  Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine
- Cableguys Kickstart | no | doesn't work with wine
- Cableguys Volume Shaper | no | doesn't work with wine
- Credland Audio BigKick | no | doesn't work with wine
+  Cableguys Volume Shaper | yes | you need to install native d2d1.dll and override it in winecfg
+ Credland Audio BigKick | yes | you need to install native d2d1.dll and override it in winecfg
  FabFilter plugins | yes | haven't tested them all
  Green Oak Software Crystal | yes |
  Image-Line Harmless | yes |

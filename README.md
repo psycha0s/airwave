@@ -119,5 +119,5 @@ The following list is not complete. It contains only plugins, that have been tes
  u-he plugins | yes | Linux version is also available
  Variety of Sound plugins | yes |
  Voxengo plugins | mostly | inter plugin routing doesn't work (architecture issue)
- Xfer Serum | no | the GUI doesn't appear (wine issue), but audio works
+ Xfer Serum | yes | you need to install native d2d1.dll and override it in winecfg
  EZDrummer2, BFD3, XLN AD2 | yes | host need multi-channel support

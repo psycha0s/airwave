@@ -86,7 +86,7 @@ The following list is not complete. It contains only plugins, that have been tes
  Green Oak Software Crystal | yes |
  Image-Line Harmless | yes |
  Image-Line Sytrus | yes |
- LennarDigital Sylenth1 | no | doesn't work with wine
+ LennarDigital Sylenth1 | yes | you need to override d2d1.dll in winecfg
  LePou Plugins | yes | LeCab2 has slight GUI redrawing issues
  NI Absynth | yes |
  NI FM8 | yes |

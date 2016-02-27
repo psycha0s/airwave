@@ -72,7 +72,7 @@ When the airwave-plugin is loaded by the VST host, it obtains its absolute path 
 
 ## Compatibility
 The following list is not complete. It contains only plugins, that have been tested by me or by people, who sent me a report.
-Please note about d2d1.dll mentioned in the list: currently I know that only one version of d2d1.dll is working:
+Please note about d2d1.dll mentioned in the list: currently I know that only one version of d2d1.dll is working:  
 version: 6.1.7601.17514  
 size: 827904 bytes  
 md5 hash: 3e0a1bf9e17349a8392455845721f92f  

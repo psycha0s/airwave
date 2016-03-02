@@ -66,8 +66,8 @@ private:
 	void handleSetDataBlock(DataFrame* frame);
 
 	bool handleDispatch(DataFrame* frame);
-	void handleGetParameter();
-	void handleSetParameter();
+	void handleGetParameter(DataPort* port);
+	void handleSetParameter(DataPort* port);
 	void handleProcessSingle();
 	void handleProcessDouble();
 

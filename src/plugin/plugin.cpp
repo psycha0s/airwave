@@ -642,27 +642,27 @@ void Plugin::sendXembedMessage(Display* display, Window window, long message, lo
 }
 
 
-float Plugin::getParameter(i32 index)
+float Plugin::getParameter(DataPort* port, i32 index)
 {
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame = port->frame<DataFrame>();
 	frame->command = Command::GetParameter;
 	frame->index = index;
 
-	audioPort_.sendRequest();
-	audioPort_.waitResponse();
+	port->sendRequest();
+	port->waitResponse();
 	return frame->opt;
 }
 
 
-void Plugin::setParameter(i32 index, float value)
+void Plugin::setParameter(DataPort* port, i32 index, float value)
 {
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame = port->frame<DataFrame>();
 	frame->command = Command::SetParameter;
 	frame->index = index;
 	frame->opt = value;
 
-	audioPort_.sendRequest();
-	audioPort_.waitResponse();
+	port->sendRequest();
+	port->waitResponse();
 }
 
 
@@ -739,16 +739,48 @@ intptr_t Plugin::dispatchProc(AEffect* effect, i32 opcode, i32 index, intptr_t v
 float Plugin::getParameterProc(AEffect* effect, i32 index)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
-	RecursiveLock lock(plugin->audioGuard_);
-	return plugin->getParameter(index);
+
+	// Audio port gets connected only after block size gets known (effSetBlockSize). Thus
+	// we will send all get/set parameter requests through control port as long as audio
+	// port remains disconnected.
+	DataPort* port;
+	RecursiveMutex* guard;
+
+	if(plugin->audioPort_.isConnected()) {
+		port = &plugin->audioPort_;
+		guard = &plugin->audioGuard_;
+	}
+	else {
+		port = &plugin->controlPort_;
+		guard = &plugin->guard_;
+	}
+
+	RecursiveLock lock(*guard);
+	return plugin->getParameter(port, index);
 }
 
 
 void Plugin::setParameterProc(AEffect* effect, i32 index, float value)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
-	RecursiveLock lock(plugin->audioGuard_);
-	plugin->setParameter(index, value);
+
+	// Audio port gets connected only after block size gets known (effSetBlockSize). Thus
+	// we will send all get/set parameter requests through control port as long as audio
+	// port remains disconnected.
+	DataPort* port;
+	RecursiveMutex* guard;
+
+	if(plugin->audioPort_.isConnected()) {
+		port = &plugin->audioPort_;
+		guard = &plugin->audioGuard_;
+	}
+	else {
+		port = &plugin->controlPort_;
+		guard = &plugin->guard_;
+	}
+
+	RecursiveLock lock(*guard);
+	plugin->setParameter(port, index, value);
 }
 
 

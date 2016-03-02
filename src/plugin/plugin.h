@@ -65,8 +65,8 @@ private:
 	void sendXembedMessage(Display* display, Window window, long message, long detail,
 			long data1, long data2);
 
-	float getParameter(i32 index);
-	void setParameter(i32 index, float value);
+	float getParameter(DataPort* port, i32 index);
+	void setParameter(DataPort* port, i32 index, float value);
 
 	void processReplacing(float** inputs, float** outputs, i32 count);
 	void processDoubleReplacing(double** inputs, double** outputs, i32 count);

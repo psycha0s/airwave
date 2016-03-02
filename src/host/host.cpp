@@ -178,6 +178,14 @@ bool Host::processRequest()
 		handleSetDataBlock(frame);
 		break;
 
+	case Command::GetParameter:
+		handleGetParameter(&controlPort_);
+		break;
+
+	case Command::SetParameter:
+		handleSetParameter(&controlPort_);
+		break;
+
 	case Command::ShowWindow: {
 		if(hwnd_) {
 			ShowWindow(hwnd_, SW_SHOW);
@@ -245,10 +253,10 @@ void Host::audioThread()
 				handleProcessSingle();
 			}
 			else if(frame->command == Command::GetParameter) {
-				handleGetParameter();
+				handleGetParameter(&audioPort_);
 			}
 			else if(frame->command == Command::SetParameter) {
-				handleSetParameter();
+				handleSetParameter(&audioPort_);
 			}
 			else if(frame->command == Command::ProcessDouble) {
 				handleProcessDouble();
@@ -497,18 +505,16 @@ bool Host::handleDispatch(DataFrame* frame)
 }
 
 
-void Host::handleGetParameter()
+void Host::handleGetParameter(DataPort* port)
 {
-//	DataFrame* frame = controlPort_.frame<DataFrame>();
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame = port->frame<DataFrame>();
 	frame->opt = effect_->getParameter(effect_, frame->index);
 }
 
 
-void Host::handleSetParameter()
+void Host::handleSetParameter(DataPort* port)
 {
-//	DataFrame* frame = controlPort_.frame<DataFrame>();
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame = port->frame<DataFrame>();
 	effect_->setParameter(effect_, frame->index, frame->opt);
 }
 

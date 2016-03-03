@@ -176,27 +176,28 @@ void Plugin::callbackThread()
 
 intptr_t Plugin::setBlockSize(DataPort* port, intptr_t frames)
 {
-	if(audioPort_.frameSize() > static_cast<size_t>(frames))
-		return 1;
-
-	DEBUG("Setting block size to %d frames", frames);
-	audioPort_.disconnect();
-
 	size_t frameSize = sizeof(DataFrame) + sizeof(double) *
 			(frames * effect_->numInputs + frames * effect_->numOutputs);
 
-	if(!audioPort_.create(frameSize)) {
-		ERROR("Unable to create audio port");
-		return 0;
+	if(audioPort_.frameSize() < frameSize) {
+		DEBUG("Setting block size to %d frames", frames);
+		audioPort_.disconnect();
+
+		if(!audioPort_.create(frameSize)) {
+			ERROR("Unable to create audio port");
+			return 0;
+		}
+
+		DataFrame* frame = controlPort_.frame<DataFrame>();
+		frame->command = Command::Dispatch;
+		frame->opcode = effSetBlockSize;
+		frame->index = audioPort_.id();
+		port->sendRequest();
+		port->waitResponse();
+		return frame->value;
 	}
 
-	DataFrame* frame = controlPort_.frame<DataFrame>();
-	frame->command = Command::Dispatch;
-	frame->opcode = effSetBlockSize;
-	frame->index = audioPort_.id();
-	port->sendRequest();
-	port->waitResponse();
-	return frame->value;
+	return 1;
 }
 
 

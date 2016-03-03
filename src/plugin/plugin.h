@@ -57,6 +57,8 @@ private:
 
 	void callbackThread();
 
+	intptr_t setBlockSize(DataPort* port, intptr_t frames);
+
 	intptr_t handleAudioMaster();
 
 	intptr_t dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value, void* ptr,

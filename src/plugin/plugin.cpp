@@ -174,6 +174,31 @@ void Plugin::callbackThread()
 }
 
 
+intptr_t Plugin::setBlockSize(DataPort* port, intptr_t frames)
+{
+	if(audioPort_.frameSize() > static_cast<size_t>(frames))
+		return 1;
+
+	DEBUG("Setting block size to %d frames", frames);
+	audioPort_.disconnect();
+
+	size_t frameSize = sizeof(DataFrame) + sizeof(double) *
+			(frames * effect_->numInputs + frames * effect_->numOutputs);
+
+	if(!audioPort_.create(frameSize)) {
+		ERROR("Unable to create audio port");
+		return 0;
+	}
+
+	DataFrame* frame = controlPort_.frame<DataFrame>();
+	frame->opcode = effSetBlockSize;
+	frame->index = audioPort_.id();
+	port->sendRequest();
+	port->waitResponse();
+	return frame->value;
+}
+
+
 intptr_t Plugin::handleAudioMaster()
 {
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
@@ -270,8 +295,15 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 	case effEditIdle:
 		return 1;
 
+	case effOpen: {
+		port->sendRequest();
+		port->waitResponse();
+		int result = frame->value;
+
+		setBlockSize(port, 256);
+		return result; }
+
 	case effGetVstVersion:
-	case effOpen:
 	case effGetPlugCategory:
 	case effSetSampleRate:
 	case effGetVendorVersion:
@@ -306,22 +338,8 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		loggerFree();
 		return 1;
 
-	case effSetBlockSize: {
-		DEBUG("Setting block size to %d frames", value);
-		audioPort_.disconnect();
-
-		size_t frameSize = sizeof(DataFrame) + sizeof(double) *
-				(value * effect_->numInputs + value * effect_->numOutputs);
-
-		if(!audioPort_.create(frameSize)) {
-			ERROR("Unable to create audio port");
-			return 0;
-		}
-
-		frame->index = audioPort_.id();
-		port->sendRequest();
-		port->waitResponse();
-		return frame->value; }
+	case effSetBlockSize:
+		return setBlockSize(port, value);
 
 	case effEditOpen: {
 		Display* display = XOpenDisplay(nullptr);

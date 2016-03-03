@@ -11,7 +11,7 @@ DirectoryView::DirectoryView(QWidget* parent) :
 	setRootIsDecorated(false);
 
 	NoFocusDelegate* delegate = new NoFocusDelegate(this);
-	delegate->setExtraHeight(4);
+//	delegate->setExtraHeight(4);
 	setItemDelegate(delegate);
 
 	setContextMenuPolicy(Qt::CustomContextMenu);

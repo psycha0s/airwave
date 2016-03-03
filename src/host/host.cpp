@@ -50,7 +50,7 @@ bool Host::initialize(const char* fileName, int portId)
 
 	module_ = LoadLibrary(fileName);
 	if(!module_) {
-		ERROR("Unable to load '%s' shared library: %s", errorString().c_str());
+		ERROR("Unable to load '%s' shared library: %s", fileName, errorString().c_str());
 		return false;
 	}
 
@@ -159,7 +159,7 @@ bool Host::processRequest()
 		return false;
 	}
 
-	if(!controlPort_.waitRequest(20))
+	if(!controlPort_.waitRequest(10))
 		return true;
 
 	bool result = true;
@@ -168,14 +168,6 @@ bool Host::processRequest()
 	switch(frame->command) {
 	case Command::Dispatch:
 		result = handleDispatch(frame);
-		break;
-
-	case Command::GetParameter:
-		handleGetParameter();
-		break;
-
-	case Command::SetParameter:
-		handleSetParameter();
 		break;
 
 	case Command::GetDataBlock:
@@ -210,9 +202,11 @@ std::string Host::errorString() const
 
 	if(error) {
 		LPVOID buffer;
-		DWORD length = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr,
-				error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		DWORD flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS;
+
+		DWORD length = FormatMessage(flags, nullptr, error,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 				reinterpret_cast<LPTSTR>(&buffer), 0, nullptr);
 
 		if(length) {
@@ -244,11 +238,17 @@ void Host::audioThread()
 	condition_.post();
 
 	while(runAudio_.test_and_set()) {
-		if(audioPort_.waitRequest(50)) {
+		if(audioPort_.waitRequest(100)) {
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
 			if(frame->command == Command::ProcessSingle) {
 				handleProcessSingle();
+			}
+			else if(frame->command == Command::GetParameter) {
+				handleGetParameter();
+			}
+			else if(frame->command == Command::SetParameter) {
+				handleSetParameter();
 			}
 			else if(frame->command == Command::ProcessDouble) {
 				handleProcessDouble();
@@ -371,8 +371,8 @@ bool Host::handleDispatch(DataFrame* frame)
 		wclass.cbClsExtra    = 0;
 		wclass.cbWndExtra    = 0;
 		wclass.hInstance     = GetModuleHandle(nullptr);
-		wclass.hIcon         = LoadIcon(GetModuleHandle(nullptr), kWindowClass);
-		wclass.hCursor       = LoadCursor(0, IDI_APPLICATION);
+		wclass.hIcon         = LoadIcon(nullptr, kWindowClass);
+		wclass.hCursor       = LoadCursor(nullptr, IDC_ARROW);
 		wclass.lpszClassName = kWindowClass;
 
 		if(!RegisterClassEx(&wclass)) {
@@ -499,14 +499,16 @@ bool Host::handleDispatch(DataFrame* frame)
 
 void Host::handleGetParameter()
 {
-	DataFrame* frame = controlPort_.frame<DataFrame>();
+//	DataFrame* frame = controlPort_.frame<DataFrame>();
+	DataFrame* frame = audioPort_.frame<DataFrame>();
 	frame->opt = effect_->getParameter(effect_, frame->index);
 }
 
 
 void Host::handleSetParameter()
 {
-	DataFrame* frame = controlPort_.frame<DataFrame>();
+//	DataFrame* frame = controlPort_.frame<DataFrame>();
+	DataFrame* frame = audioPort_.frame<DataFrame>();
 	effect_->setParameter(effect_, frame->index, frame->opt);
 }
 
@@ -568,20 +570,40 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterBeginEdit:
 	case audioMasterEndEdit:
 	case audioMasterGetVendorVersion:
-	case audioMasterIOChanged:
 	case audioMasterSizeWindow:
 	case audioMasterGetInputLatency:
 	case audioMasterGetOutputLatency:
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
+	case audioMasterGetSampleRate:
 		callbackPort_.sendRequest();
 		callbackPort_.waitResponse();
 		return frame->value;
 
+	case audioMasterIOChanged: {
+		if(!isInitialized_)
+			return 0;
+
+		PluginInfo* info = reinterpret_cast<PluginInfo*>(frame->data);
+		info->flags        = effect_->flags;
+		info->programCount = effect_->numPrograms;
+		info->paramCount   = effect_->numParams;
+		info->inputCount   = effect_->numInputs;
+		info->outputCount  = effect_->numOutputs;
+		info->initialDelay = effect_->initialDelay;
+		info->uniqueId     = effect_->uniqueID;
+		info->version      = effect_->version;
+
+		callbackPort_.sendRequest();
+		callbackPort_.waitResponse();
+		return frame->value; }
+
 	// FIXME Passing the audioMasterUpdateDisplay request to the plugin endpoint leads to
 	// crash (or lock in Renoise) with some plugins (u-he TripleCheese).
 	case audioMasterUpdateDisplay:
+//		callbackPort_.sendRequest();
+//		callbackPort_.waitResponse();
 		return 1;
 
 	case audioMasterIdle:

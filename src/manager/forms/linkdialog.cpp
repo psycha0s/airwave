@@ -69,7 +69,7 @@ void LinkDialog::setupUi()
 	setWindowTitle("Link properties");
 	setMinimumWidth(500);
 	resize(600, 180);
-	setFixedHeight(210);
+	setMinimumHeight(260);
 
 	loaderCombo_ = new QComboBox;
 	loaderCombo_->setModel(qApp->loaders());

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Version=1.1.0
+Version=1.0
 Name=Airwave manager
 Comment=A tool for managing the Airwave VST bridge
-Exec=airwave-manager
-Icon=airwave-manager
+Exec=@TARGET_NAME@
+Icon=@TARGET_NAME@
 Terminal=false
 Categories=Multimedia;AudioVideo;Player;Recorder;

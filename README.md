@@ -4,7 +4,7 @@ Due to the use of shared memory, only one extra copying is made for each data tr
 
 ## Requirements
 - WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
-but earlier versions also may work)
+but earlier versions also may work). To solve the blank window issue you can apply [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch) to WINE.
 - libmagic
 - Qt5 for the airwave manager application (GUI)
 
@@ -68,10 +68,15 @@ The bridge consists of four components:
 When the airwave-plugin is loaded by the VST host, it obtains its absolute path and use it as the key to get the linked VST DLL from the configuration. Then it starts the airwave-host process and passes the path to the linked VST file. The airwave-host loads the VST DLL and works as a fake VST host. Starting from this point, the airwave-plugin and airwave-host act together like a proxy, translating commands between the native VST host and the Windows VST plugin.
 
 ## Known issues
-- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. On some hosts (Bitwig Studio for example) this can be solved by closing and re-opening the plugin window.
+- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. You can workaround this issue by patching WINE with [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch).
 
 ## Compatibility
 The following list is not complete. It contains only plugins, that have been tested by me or by people, who sent me a report.
+Please note about d2d1.dll mentioned in the list: currently I know that only one version of d2d1.dll is working:  
+version: 6.1.7601.17514  
+size: 827904 bytes  
+md5 hash: 3e0a1bf9e17349a8392455845721f92f  
+If you will get success with another version, please contact me and I will update this information.
 
  VST-Plugins | works? | Notes |
 ------------:|:----------:|:-------|
@@ -80,14 +85,13 @@ The following list is not complete. It contains only plugins, that have been tes
  Analogic Delay by interrruptor | yes |
  Bionic Delay by interrruptor | yes |
  Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine
- Cableguys Kickstart | no | doesn't work with wine
- Cableguys Volume Shaper | no | doesn't work with wine
- Credland Audio BigKick | no | doesn't work with wine
+  Cableguys Volume Shaper | yes | you need to install native d2d1.dll and override it in winecfg
+ Credland Audio BigKick | yes | you need to install native d2d1.dll and override it in winecfg
  FabFilter plugins | yes | haven't tested them all
  Green Oak Software Crystal | yes |
  Image-Line Harmless | yes |
  Image-Line Sytrus | yes |
- LennarDigital Sylenth1 | no | doesn't work with wine
+ LennarDigital Sylenth1 | yes | you need to override d2d1.dll in winecfg
  LePou Plugins | yes | LeCab2 has slight GUI redrawing issues
  NI Absynth | yes |
  NI FM8 | yes |
@@ -102,7 +106,7 @@ The following list is not complete. It contains only plugins, that have been tes
  Peavey Revalver Mark III.V | yes |
  ReFX Nexus2 | yes |
  ReFX Vanguard | yes |
- Reveal Sound Spire | yes | starting form 1.0.19 the GUI doesn't appear (wine issue)
+ Reveal Sound Spire | yes | starting form 1.0.19 you need to override d2d1.dll in winecfg
  Sonic Academy A.N.A. | yes |
  Sonic Academy KICK | yes |
  Sonic Cat LFX-1310 | yes |
@@ -119,4 +123,5 @@ The following list is not complete. It contains only plugins, that have been tes
  u-he plugins | yes | Linux version is also available
  Variety of Sound plugins | yes |
  Voxengo plugins | mostly | inter plugin routing doesn't work (architecture issue)
- Xfer Serum | no | the GUI doesn't appear (wine issue), but audio works
+ Xfer Serum | yes | you need to install native d2d1.dll and override it in winecfg
+ EZDrummer2, BFD3, XLN AD2 | yes | host need multi-channel support

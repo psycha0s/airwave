@@ -7,9 +7,9 @@
 #include "common/protocol.h"
 
 
-#define XEMBED_EMBEDDED_NOTIFY 0
-#define XEMBED_FOCUS_OUT       5
-
+#define XEMBED_EMBEDDED_NOTIFY	0
+#define XEMBED_FOCUS_OUT		5
+#define kVstExtMaxParamStrLen	24
 
 namespace Airwave {
 
@@ -174,6 +174,33 @@ void Plugin::callbackThread()
 }
 
 
+intptr_t Plugin::setBlockSize(DataPort* port, intptr_t frames)
+{
+	size_t frameSize = sizeof(DataFrame) + sizeof(double) *
+			(frames * effect_->numInputs + frames * effect_->numOutputs);
+
+	if(audioPort_.frameSize() < frameSize) {
+		DEBUG("Setting block size to %d frames", frames);
+		audioPort_.disconnect();
+
+		if(!audioPort_.create(frameSize)) {
+			ERROR("Unable to create audio port");
+			return 0;
+		}
+
+		DataFrame* frame = controlPort_.frame<DataFrame>();
+		frame->command = Command::Dispatch;
+		frame->opcode = effSetBlockSize;
+		frame->index = audioPort_.id();
+		port->sendRequest();
+		port->waitResponse();
+		return frame->value;
+	}
+
+	return 1;
+}
+
+
 intptr_t Plugin::handleAudioMaster()
 {
 	DataFrame* frame = callbackPort_.frame<DataFrame>();
@@ -193,15 +220,29 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterEndEdit:
 	case audioMasterUpdateDisplay:
 	case audioMasterGetVendorVersion:
-	case audioMasterIOChanged:
 	case audioMasterSizeWindow:
 	case audioMasterGetInputLatency:
 	case audioMasterGetOutputLatency:
 	case audioMasterGetCurrentProcessLevel:
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
-		return masterProc_(effect_, frame->opcode, frame->index, frame->value,	nullptr,
+	case audioMasterGetSampleRate:
+		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
 				frame->opt);
+
+	case audioMasterIOChanged: {
+		PluginInfo* info = reinterpret_cast<PluginInfo*>(frame->data);
+		effect_->flags        = info->flags;
+		effect_->numPrograms  = info->programCount;
+		effect_->numParams    = info->paramCount;
+		effect_->numInputs    = info->inputCount;
+		effect_->numOutputs   = info->outputCount;
+		effect_->initialDelay = info->initialDelay;
+		effect_->uniqueID     = info->uniqueId;
+		effect_->version      = info->version;
+
+		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
+				frame->opt); }
 
 	case audioMasterGetVendorString:
 	case audioMasterGetProductString:
@@ -229,7 +270,9 @@ intptr_t Plugin::handleAudioMaster()
 		return masterProc_(effect_, frame->opcode, 0, 0, e, 0.0f); }
 	}
 
-	ERROR("Unhandled audio master event: %s %d", kAudioMasterEvents[frame->opcode], frame->opcode);
+	ERROR("Unhandled audio master event: %s %d", kAudioMasterEvents[frame->opcode],
+			frame->opcode);
+
 	return 0;
 }
 
@@ -254,8 +297,15 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 	case effEditIdle:
 		return 1;
 
+	case effOpen: {
+		port->sendRequest();
+		port->waitResponse();
+		int result = frame->value;
+
+		setBlockSize(port, 256);
+		return result; }
+
 	case effGetVstVersion:
-	case effOpen:
 	case effGetPlugCategory:
 	case effSetSampleRate:
 	case effGetVendorVersion:
@@ -290,22 +340,8 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		loggerFree();
 		return 1;
 
-	case effSetBlockSize: {
-		DEBUG("Setting block size to %d frames", value);
-		audioPort_.disconnect();
-
-		size_t frameSize = sizeof(DataFrame) + sizeof(double) *
-				(value * effect_->numInputs + value * effect_->numOutputs);
-
-		if(!audioPort_.create(frameSize)) {
-			ERROR("Unable to create audio port");
-			return 0;
-		}
-
-		frame->index = audioPort_.id();
-		port->sendRequest();
-		port->waitResponse();
-		return frame->value; }
+	case effSetBlockSize:
+		return setBlockSize(port, value);
 
 	case effEditOpen: {
 		Display* display = XOpenDisplay(nullptr);
@@ -376,8 +412,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		char* dest         = reinterpret_cast<char*>(frame->data);
 		size_t maxLength   = port->frameSize() - sizeof(DataFrame);
 
-		std::strncpy(dest, source, maxLength);
-		dest[maxLength-1] = '\0';
+		vst_strncpy(dest, source, maxLength);
 
 		port->sendRequest();
 		port->waitResponse();
@@ -390,16 +425,14 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxProgNameLen);
 		return frame->value; }
 
 	case effSetProgramName: {
 		const char* source = static_cast<const char*>(ptr);
 		char* dest         = reinterpret_cast<char*>(frame->data);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxProgNameLen);
 
 		port->sendRequest();
 		port->waitResponse();
@@ -414,8 +447,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxVendorStrLen);
-		dest[kVstMaxVendorStrLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxVendorStrLen);
 		return frame->value; }
 
 	case effGetParamName:
@@ -427,14 +459,16 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-//		std::strncpy(dest, source, kVstMaxParamStrLen);
-//		dest[kVstMaxParamStrLen-1] = '\0';
+//		vst_strncpy(dest, source, kVstMaxParamStrLen);
+//		vst_strncpy(dest, source, kVstExtMaxParamStrLen);
 
 		// Workaround for Variety of Sound plugins bug (non-printable characters)
 		int i;
-		for(i = 0; i < kVstMaxParamStrLen - 1; ++i) {
-			if(isprint(source[i]))
-				dest[i] = source[i];
+		for(i = 0; i < kVstExtMaxParamStrLen - 1; ++i) {
+			if(!isprint(source[i]))
+				break;
+
+			dest[i] = source[i];
 		}
 
 		dest[i] = '\0';
@@ -447,8 +481,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxEffectNameLen);
-		dest[kVstMaxEffectNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxEffectNameLen);
 		return frame->value; }
 
 	case effGetParameterProperties:
@@ -473,8 +506,7 @@ intptr_t Plugin::dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value,
 		const char* source = reinterpret_cast<const char*>(frame->data);
 		char* dest         = static_cast<char*>(ptr);
 
-		std::strncpy(dest, source, kVstMaxProgNameLen);
-		dest[kVstMaxProgNameLen-1] = '\0';
+		vst_strncpy(dest, source, kVstMaxProgNameLen);
 		return frame->value; }
 
 	case effGetMidiKeyName:
@@ -632,25 +664,25 @@ void Plugin::sendXembedMessage(Display* display, Window window, long message, lo
 
 float Plugin::getParameter(i32 index)
 {
-	DataFrame* frame = controlPort_.frame<DataFrame>();
+	DataFrame* frame = audioPort_.frame<DataFrame>();
 	frame->command = Command::GetParameter;
 	frame->index = index;
 
-	controlPort_.sendRequest();
-	controlPort_.waitResponse();
+	audioPort_.sendRequest();
+	audioPort_.waitResponse();
 	return frame->opt;
 }
 
 
 void Plugin::setParameter(i32 index, float value)
 {
-	DataFrame* frame = controlPort_.frame<DataFrame>();
+	DataFrame* frame = audioPort_.frame<DataFrame>();
 	frame->command = Command::SetParameter;
 	frame->index = index;
 	frame->opt = value;
 
-	controlPort_.sendRequest();
-	controlPort_.waitResponse();
+	audioPort_.sendRequest();
+	audioPort_.waitResponse();
 }
 
 
@@ -727,7 +759,7 @@ intptr_t Plugin::dispatchProc(AEffect* effect, i32 opcode, i32 index, intptr_t v
 float Plugin::getParameterProc(AEffect* effect, i32 index)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
-	RecursiveLock lock(plugin->guard_);
+	RecursiveLock lock(plugin->audioGuard_);
 	return plugin->getParameter(index);
 }
 
@@ -735,7 +767,7 @@ float Plugin::getParameterProc(AEffect* effect, i32 index)
 void Plugin::setParameterProc(AEffect* effect, i32 index, float value)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
-	RecursiveLock lock(plugin->guard_);
+	RecursiveLock lock(plugin->audioGuard_);
 	plugin->setParameter(index, value);
 }
 

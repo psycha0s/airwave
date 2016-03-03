@@ -23,9 +23,8 @@ void PrefixDialog::setupUi()
 {
 	setWindowIcon(QIcon(":/windows.png"));
 	setWindowTitle("WINE prefix properties");
-	setMinimumWidth(300);
-	setFixedHeight(100);
-	resize(300, 100);
+	setFixedWidth(320);
+	setFixedHeight(130);
 
 	nameEdit_ = new LineEdit;
 

@@ -200,9 +200,11 @@ void LineEdit::paintEvent(QPaintEvent* event)
 	QFontMetrics fm(font());
 	QMargins margins = textMargins();
 
+	int half = (height() - fm.height()) / 2;
+
 	if(!prefix_.isEmpty()) {
-		int x = margins.left() - fm.width(prefix_) + 4;
-		int y = margins.top() + fm.height();
+		int x = margins.left() - fm.width(prefix_) + 6;
+		int y = margins.top() + fm.ascent() + half;
 
 		painter.setPen(prefixColor_);
 		painter.drawText(x, y, prefix_);
@@ -210,7 +212,7 @@ void LineEdit::paintEvent(QPaintEvent* event)
 
 	if(!suffix_.isEmpty()) {
 		int x = width() - margins.right();
-		int y = margins.top() + fm.height();
+		int y = margins.top() + fm.ascent() + half;
 
 		painter.setPen(suffixColor_);
 		painter.drawText(x, y, suffix_);

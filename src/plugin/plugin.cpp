@@ -191,6 +191,7 @@ intptr_t Plugin::setBlockSize(DataPort* port, intptr_t frames)
 	}
 
 	DataFrame* frame = controlPort_.frame<DataFrame>();
+	frame->command = Command::Dispatch;
 	frame->opcode = effSetBlockSize;
 	frame->index = audioPort_.id();
 	port->sendRequest();

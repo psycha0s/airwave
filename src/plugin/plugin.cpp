@@ -751,8 +751,16 @@ intptr_t Plugin::dispatchProc(AEffect* effect, i32 opcode, i32 index, intptr_t v
 		guard = &plugin->audioGuard_;
 	}
 
-	RecursiveLock lock(*guard);
-	return plugin->dispatch(port, opcode, index, value, ptr, opt);
+	guard->lock();
+	int result = plugin->dispatch(port, opcode, index, value, ptr, opt);
+
+	// If opcode equals to effClose, then plugin will be destroyed inside of
+	// plugin->dispatch() call, thus we don't need to unlock the mutex and can't
+	// dereference the guard pointer here
+	if(opcode != effClose)
+		guard->unlock();
+
+	return result;
 }
 
 

@@ -742,7 +742,11 @@ intptr_t Plugin::dispatchProc(AEffect* effect, i32 opcode, i32 index, intptr_t v
 	DataPort* port;
 	RecursiveMutex* guard;
 
-	if(std::this_thread::get_id() == plugin->mainThreadId_) {
+	// Ardour seems to be sending effEditOpen on something else besides the main thread.
+	// However, we do want to send it to the control port, since that's where our
+	// bridge expects it.
+	if (opcode == effEditOpen ||
+	    std::this_thread::get_id() == plugin->mainThreadId_) {
 		port = &plugin->controlPort_;
 		guard = &plugin->guard_;
 	}

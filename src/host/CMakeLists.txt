@@ -3,6 +3,8 @@ set(TARGET_NAME ${HOST_BASENAME})
 
 project(${TARGET_NAME})
 
+option(DISABLE_64BIT  "Disable building of the 64-bit host endpoint" OFF)
+
 find_package(Threads REQUIRED)
 
 include_directories(
@@ -36,7 +38,7 @@ set(SOURCES
 	main.cpp
 )
 
-if(PLATFORM_64BIT)
+if(NOT DISABLE_64BIT AND PLATFORM_64BIT)
 	# Set target
 	add_executable(${TARGET_NAME}-64 WIN32 ${SOURCES})
 

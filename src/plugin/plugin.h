@@ -42,10 +42,12 @@ private:
 
 	RecursiveMutex guard_;
 	RecursiveMutex audioGuard_;
+    RecursiveMutex processReplacingGuard_;
 
 	DataPort controlPort_;
 	DataPort callbackPort_;
 	DataPort audioPort_;
+    DataPort processReplacingPort_;
 
 	Event condition_;
 

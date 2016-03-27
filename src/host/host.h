@@ -43,19 +43,20 @@ private:
 	DataPort controlPort_;
 	DataPort callbackPort_;
 	DataPort audioPort_;
-	DataPort processReplacingPort_;
+	DataPort processingPort_;
 
 	Event condition_;
 
 	HANDLE audioThread_;
-    HANDLE processReplacingThread_;
+	HANDLE processingThread_;
 	std::atomic_flag runAudio_;
-	std::atomic_flag runProcessReplacing_;
+	std::atomic_flag runProcessing_;
 
 	bool isEditorOpen_;
 
 	WNDPROC oldWndProc_;
 	HWND childHwnd_;
+	bool isBitwig_;
 
 	static Host* self_;
 	static constexpr const char* kWindowClass = PROJECT_NAME;
@@ -64,7 +65,7 @@ private:
 	void destroyEditorWindow();
 
 	void audioThread();
-	void processReplacingThread();
+	void processingThread();
 
 	void handleGetDataBlock(DataFrame* frame);
 	void handleSetDataBlock(DataFrame* frame);
@@ -81,7 +82,7 @@ private:
 			intptr_t value, void* ptr, float opt);
 
 	static DWORD CALLBACK audioThreadProc(void* param);
-    static DWORD CALLBACK processReplacingThreadProc(void* param);
+	static DWORD CALLBACK processingThreadProc(void* param);
 
 	static LRESULT CALLBACK windowProc(HWND hwnd, UINT message, WPARAM wParam,
 			LPARAM lParam);

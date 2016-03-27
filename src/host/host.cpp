@@ -22,6 +22,7 @@ Host::Host() :
 	childHwnd_(0)
 {
 	DEBUG("Main thread id: %p", GetCurrentThreadId());
+	isBitwig_ = true;
 }
 
 
@@ -31,9 +32,10 @@ Host::~Host()
 		TRACE("Waiting for audio thread termination...");
 
 		runAudio_.clear();
-		runProcessReplacing_.clear();
+		runProcessing_.clear();
+
 		WaitForSingleObject(audioThread_, INFINITE);
-		WaitForSingleObject(processReplacingThread_, INFINITE);
+		WaitForSingleObject(processingThread_, INFINITE);
 
 		destroyEditorWindow();
 
@@ -243,14 +245,17 @@ void Host::audioThread()
 		if(audioPort_.waitRequest(100)) {
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
-			if(frame->command == Command::GetParameter) {
+			if(isBitwig_ && frame->command == Command::ProcessSingle) {
+				handleProcessSingle();
+			}
+			else if(isBitwig_ && frame->command == Command::ProcessDouble) {
+				handleProcessDouble();
+			}
+			else if(frame->command == Command::GetParameter) {
 				handleGetParameter();
 			}
 			else if(frame->command == Command::SetParameter) {
 				handleSetParameter();
-			}
-			else if(frame->command == Command::ProcessDouble) {
-				handleProcessDouble();
 			}
 			else if(frame->command == Command::Dispatch) {
 				handleDispatch(frame);
@@ -265,24 +270,29 @@ void Host::audioThread()
 	}
 }
 
-void Host::processReplacingThread()
+
+void Host::processingThread()
 {
-    while(runProcessReplacing_.test_and_set()) {
-        if(processReplacingPort_.waitRequest(100)) {
-            DataFrame* frame = processReplacingPort_.frame<DataFrame>();
+	while(runProcessing_.test_and_set()) {
+    	if(processingPort_.waitRequest(100)) {
+            DataFrame* frame = processingPort_.frame<DataFrame>();
 
             if(frame->command == Command::ProcessSingle) {
                 handleProcessSingle();
-            }
-            else {
-                ERROR("processReplacingThread() unacceptable command: %d", frame->command);
+        	}
+			else if(frame->command == Command::ProcessDouble) {
+				handleProcessDouble();
+			}
+        	else {
+                ERROR("processingThread() unacceptable command: %d", frame->command);
             }
 
             frame->command = Command::Response;
-            processReplacingPort_.sendResponse();
+            processingPort_.sendResponse();
         }
     }
 }
+
 
 void Host::handleGetDataBlock(DataFrame* frame)
 {
@@ -362,25 +372,33 @@ bool Host::handleDispatch(DataFrame* frame)
 			runAudio_.clear();
 			WaitForSingleObject(audioThread_, INFINITE);
 		}
-		if(runProcessReplacing_.test_and_set()) {
-		    runProcessReplacing_.clear();
-		    WaitForSingleObject(processReplacingThread_, INFINITE);
-		}
 
 		audioPort_.disconnect();
 		if(!audioPort_.connect(frame->index)) {
 			ERROR("Unable to connect audio port");
 			return false;
 		}
-		processReplacingPort_.disconnect();
-        if(!processReplacingPort_.connect(frame->value)) {
-            ERROR("Unable to connect process replacing port");
-            return false;
-        }
 
 		runAudio_.test_and_set();
 		audioThread_ = CreateThread(nullptr, 0, audioThreadProc, this, 0, nullptr);
-		processReplacingThread_ = CreateThread(nullptr, 0, processReplacingThreadProc, this, 0, nullptr);
+
+		isBitwig_ = frame->value == 0;
+
+		if(!isBitwig_) {
+			if(runProcessing_.test_and_set()) {
+				runProcessing_.clear();
+				WaitForSingleObject(processingThread_, INFINITE);
+			}
+
+			processingPort_.disconnect();
+			if(!processingPort_.connect(frame->value)) {
+				ERROR("Unable to connect processing port");
+				return false;
+			}
+
+			processingThread_ = CreateThread(nullptr, 0, processingThreadProc, this, 0,
+					nullptr);
+		}
 
 		condition_.wait();
 
@@ -542,7 +560,14 @@ void Host::handleSetParameter()
 
 void Host::handleProcessSingle()
 {
-	DataFrame* frame = processReplacingPort_.frame<DataFrame>();
+	DataFrame* frame;
+
+	if(isBitwig_) {
+		frame = audioPort_.frame<DataFrame>();
+	}
+	else {
+		frame = processingPort_.frame<DataFrame>();
+	}
 
 	float* inputs[effect_->numInputs];
 	float* outputs[effect_->numOutputs];
@@ -561,7 +586,14 @@ void Host::handleProcessSingle()
 
 void Host::handleProcessDouble()
 {
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame;
+
+	if(isBitwig_) {
+		frame = audioPort_.frame<DataFrame>();
+	}
+	else {
+		frame = processingPort_.frame<DataFrame>();
+	}
 
 	double* inputs[effect_->numInputs];
 	double* outputs[effect_->numOutputs];
@@ -735,14 +767,15 @@ DWORD CALLBACK Host::audioThreadProc(void* param)
 	return 0;
 }
 
-DWORD CALLBACK Host::processReplacingThreadProc(void* param)
+
+DWORD CALLBACK Host::processingThreadProc(void* param)
 {
-    TRACE("processReplacing thread started");
+    TRACE("processing thread started");
 
     Host* host = static_cast<Host*>(param);
-    host->processReplacingThread();
+    host->processingThread();
 
-    TRACE("processReplacing thread terminated");
+    TRACE("processing thread terminated");
     return 0;
 }
 

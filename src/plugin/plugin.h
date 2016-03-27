@@ -42,12 +42,12 @@ private:
 
 	RecursiveMutex guard_;
 	RecursiveMutex audioGuard_;
-    RecursiveMutex processReplacingGuard_;
+	RecursiveMutex processGuard_;
 
 	DataPort controlPort_;
 	DataPort callbackPort_;
 	DataPort audioPort_;
-    DataPort processReplacingPort_;
+	DataPort processingPort_;
 
 	Event condition_;
 
@@ -56,6 +56,8 @@ private:
 	std::thread callbackThread_;
 	std::atomic_flag processCallbacks_;
 	std::thread::id mainThreadId_;
+
+	bool isBitwig_;
 
 	void callbackThread();
 
@@ -72,8 +74,10 @@ private:
 	float getParameter(i32 index);
 	void setParameter(i32 index, float value);
 
-	void processReplacing(float** inputs, float** outputs, i32 count);
-	void processDoubleReplacing(double** inputs, double** outputs, i32 count);
+	void processReplacing(DataPort* port, float** inputs, float** outputs, i32 count);
+
+	void processDoubleReplacing(DataPort* port, double** inputs, double** outputs,
+			i32 count);
 
 	static intptr_t dispatchProc(AEffect* effect, i32 opcode, i32 index, intptr_t value,
 			void* ptr, float opt);

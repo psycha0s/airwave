@@ -30,6 +30,11 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 
 	DEBUG("Main thread id: %p", mainThreadId_);
 
+	char hostId[kVstMaxProductStrLen] = { 0 };
+	masterProc(nullptr, audioMasterGetProductString, 0, 0, hostId, 0.0f);
+	isBitwig_ = strncmp(hostId, "Bitwig Studio", kVstMaxProductStrLen) == 0;
+	TRACE("VST host id: '%s' (%d)", hostId, isBitwig_);
+
 	// FIXME: frame size should be verified.
 	if(!controlPort_.create(65536)) {
 		ERROR("Unable to create control port");
@@ -137,7 +142,7 @@ Plugin::~Plugin()
 	controlPort_.disconnect();
 	callbackPort_.disconnect();
 	audioPort_.disconnect();
-	processReplacingPort_.disconnect();
+	processingPort_.disconnect();
 
 	TRACE("Waiting for child process termination...");
 
@@ -183,22 +188,22 @@ intptr_t Plugin::setBlockSize(DataPort* port, intptr_t frames)
 	if(audioPort_.frameSize() < frameSize) {
 		DEBUG("Setting block size to %d frames", frames);
 		audioPort_.disconnect();
-		processReplacingPort_.disconnect();
+		processingPort_.disconnect();
 
 		if(!audioPort_.create(frameSize)) {
 			ERROR("Unable to create audio port");
 			return 0;
 		}
-        if(!processReplacingPort_.create(frameSize)) {
-            ERROR("Unable to create processReplacing port");
-            return 0;
-        }
+		if(!isBitwig_ && !processingPort_.create(frameSize)) {
+			ERROR("Unable to create processing port");
+			return 0;
+		}
 
 		DataFrame* frame = controlPort_.frame<DataFrame>();
 		frame->command = Command::Dispatch;
 		frame->opcode = effSetBlockSize;
 		frame->index = audioPort_.id();
-		frame->value = processReplacingPort_.id();
+		frame->value = isBitwig_ ? 0 : processingPort_.id();
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;
@@ -693,9 +698,9 @@ void Plugin::setParameter(i32 index, float value)
 }
 
 
-void Plugin::processReplacing(float** inputs, float** outputs, i32 count)
+void Plugin::processReplacing(DataPort* port, float** inputs, float** outputs, i32 count)
 {
-	DataFrame* frame = processReplacingPort_.frame<DataFrame>();
+	DataFrame* frame = port->frame<DataFrame>();
 	frame->command = Command::ProcessSingle;
 	frame->value = count;
 	float* data = reinterpret_cast<float*>(frame->data);
@@ -705,8 +710,8 @@ void Plugin::processReplacing(float** inputs, float** outputs, i32 count)
 		data += count;
 	}
 
-	processReplacingPort_.sendRequest();
-	processReplacingPort_.waitResponse();
+	port->sendRequest();
+	port->waitResponse();
 
 	data = reinterpret_cast<float*>(frame->data);
 
@@ -717,9 +722,10 @@ void Plugin::processReplacing(float** inputs, float** outputs, i32 count)
 }
 
 
-void Plugin::processDoubleReplacing(double** inputs, double** outputs, i32 count)
+void Plugin::processDoubleReplacing(DataPort* port, double** inputs, double** outputs,
+		i32 count)
 {
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame = port->frame<DataFrame>();
 	frame->command = Command::ProcessDouble;
 	frame->value = count;
 	double* data = reinterpret_cast<double*>(frame->data);
@@ -727,8 +733,8 @@ void Plugin::processDoubleReplacing(double** inputs, double** outputs, i32 count
 	for(int i = 0; i < effect_->numInputs; ++i)
 		data = std::copy(inputs[i], inputs[i] + count, data);
 
-	audioPort_.sendRequest();
-	audioPort_.waitResponse();
+	port->sendRequest();
+	port->waitResponse();
 
 	data = reinterpret_cast<double*>(frame->data);
 
@@ -794,8 +800,20 @@ void Plugin::processReplacingProc(AEffect* effect, float** inputs, float** outpu
 		i32 sampleCount)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
-	RecursiveLock lock(plugin->processReplacingGuard_);
-	plugin->processReplacing(inputs, outputs, sampleCount);
+	DataPort* port;
+	RecursiveMutex* guard;
+
+	if(plugin->isBitwig_) {
+		port = &plugin->audioPort_;
+		guard = &plugin->audioGuard_;
+	}
+	else {
+		port = &plugin->processingPort_;
+		guard = &plugin->processGuard_;
+	}
+
+	RecursiveLock lock(*guard);
+	plugin->processReplacing(port, inputs, outputs, sampleCount);
 }
 
 
@@ -803,8 +821,20 @@ void Plugin::processDoubleReplacingProc(AEffect* effect, double** inputs,
 		double** outputs, i32 sampleCount)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
-	RecursiveLock lock(plugin->audioGuard_);
-	plugin->processDoubleReplacing(inputs, outputs, sampleCount);
+	DataPort* port;
+	RecursiveMutex* guard;
+
+	if(plugin->isBitwig_) {
+		port = &plugin->audioPort_;
+		guard = &plugin->audioGuard_;
+	}
+	else {
+		port = &plugin->processingPort_;
+		guard = &plugin->processGuard_;
+	}
+
+	RecursiveLock lock(*guard);
+	plugin->processDoubleReplacing(port, inputs, outputs, sampleCount);
 }
 
 

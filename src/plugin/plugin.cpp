@@ -23,7 +23,9 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 	dataLength_(0),
 	childPid_(-1),
 	processCallbacks_(ATOMIC_FLAG_INIT),
-	mainThreadId_(std::this_thread::get_id())
+	mainThreadId_(std::this_thread::get_id()),
+	lastIndex_(-1),
+	lastValue_(0)
 {
 	// The constructor will return early when error occurs. In this case the effect()
 	// fucntion will be returning nullptr, indicating the error.
@@ -229,11 +231,17 @@ intptr_t Plugin::handleAudioMaster()
 		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
 				frame->opt);
 
-	case audioMasterAutomate:
-		isInAutomate_ = true;
+	case audioMasterAutomate: {
+		lastThreadId_ = std::this_thread::get_id();
+		lastIndex_ = frame->index;
 		lastValue_ = frame->value;
-		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
-				frame->opt);
+
+		intptr_t result = masterProc_(effect_, frame->opcode, frame->index, frame->value,
+				nullptr, frame->opt);
+
+		lastIndex_ = -1;
+		return result;
+	}
 
 	case audioMasterIOChanged: {
 		PluginInfo* info = reinterpret_cast<PluginInfo*>(frame->data);
@@ -776,8 +784,12 @@ float Plugin::getParameterProc(AEffect* effect, i32 index)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
 
-	if(plugin->isInAutomate_) {
-		plugin->isInAutomate_ = false;
+	if(plugin->lastIndex_ != -1 && std::this_thread::get_id() == plugin->lastThreadId_) {
+		if(plugin->lastIndex_ != index) {
+			ERROR("Unable to get parameter (%d!=%d)", plugin->lastIndex_, index);
+			return 0.0f;
+		}
+
 		return plugin->lastValue_;
 	}
 

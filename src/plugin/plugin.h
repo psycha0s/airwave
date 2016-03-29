@@ -60,8 +60,9 @@ private:
 	// seems to deadlock when processReplacing() is going on at the same time.
 	// We will remember the parameter's value and feed it to the host when it will call
 	// getParameter() from audioMasterAutomate handler.
-	bool isInAutomate_;
+	i32 lastIndex_;
 	float lastValue_;
+	std::thread::id lastThreadId_;
 
 	void callbackThread();
 

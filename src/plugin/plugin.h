@@ -55,6 +55,11 @@ private:
 	std::atomic_flag processCallbacks_;
 	std::thread::id mainThreadId_;
 
+	// When handling audioMasterAutomate, Ardour calls back into the plugin using
+	// getParameter(). It's unclear whether that's VST-legal or not, but at the moment it
+	// seems to deadlock when processReplacing() is going on at the same time.
+	// We will remember the parameter's value and feed it to the host when it will call
+	// getParameter() from audioMasterAutomate handler.
 	bool isInAutomate_;
 	float lastValue_;
 

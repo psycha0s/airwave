@@ -55,6 +55,9 @@ private:
 	std::atomic_flag processCallbacks_;
 	std::thread::id mainThreadId_;
 
+	bool isInAutomate_;
+	float lastValue_;
+
 	void callbackThread();
 
 	intptr_t setBlockSize(DataPort* port, intptr_t frames);

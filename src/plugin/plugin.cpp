@@ -213,7 +213,6 @@ intptr_t Plugin::handleAudioMaster()
 
 	switch(frame->opcode) {
 	case audioMasterVersion:
-	case audioMasterAutomate:
 	case __audioMasterWantMidiDeprecated:
 	case audioMasterIdle:
 	case audioMasterBeginEdit:
@@ -227,6 +226,12 @@ intptr_t Plugin::handleAudioMaster()
 	case audioMasterGetAutomationState:
 	case audioMasterCurrentId:
 	case audioMasterGetSampleRate:
+		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
+				frame->opt);
+
+	case audioMasterAutomate:
+		isInAutomate_ = true;
+		lastValue_ = frame->value;
 		return masterProc_(effect_, frame->opcode, frame->index, frame->value, nullptr,
 				frame->opt);
 
@@ -770,6 +775,12 @@ intptr_t Plugin::dispatchProc(AEffect* effect, i32 opcode, i32 index, intptr_t v
 float Plugin::getParameterProc(AEffect* effect, i32 index)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
+
+	if(plugin->isInAutomate_) {
+		plugin->isInAutomate_ = false;
+		return plugin->lastValue_;
+	}
+
 	RecursiveLock lock(plugin->audioGuard_);
 	return plugin->getParameter(index);
 }

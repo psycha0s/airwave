@@ -30,7 +30,7 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
 
 	QSettings settings;
 	QString vstPath = settings.value("vstPath", qgetenv("VST_PATH")).toString();
-	vstPathEdit_->setText(vstPath);
+	vstPathEdit_->setText(vstPath.split(':').first());
 
 	Storage* storage = qApp->storage();
 	binariesPathEdit_->setText(QString::fromStdString(storage->binariesPath()));

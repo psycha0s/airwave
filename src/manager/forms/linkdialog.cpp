@@ -105,7 +105,7 @@ void LinkDialog::setupUi()
 
 	QSettings settings;
 	QString vstPath = settings.value("vstPath", qgetenv("VST_PATH")).toString();
-	locationEdit_->setText(vstPath);
+	locationEdit_->setText(vstPath.split(':').first());
 	connect(locationEdit_, SIGNAL(buttonClicked()), SLOT(browseLocation()));
 
 	nameEdit_ = new LineEdit;

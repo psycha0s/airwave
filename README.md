@@ -123,5 +123,5 @@ If you will get success with another version, please contact me and I will updat
  u-he plugins | yes | Linux version is also available
  Variety of Sound plugins | yes |
  Voxengo plugins | mostly | inter plugin routing doesn't work (architecture issue)
- Xfer Serum | yes | you need to install native d2d1.dll and override it in winecfg
+ Xfer Serum | yes | install native GDI+ (run `winetricks gdiplus`)
  EZDrummer2, BFD3, XLN AD2 | yes | host need multi-channel support

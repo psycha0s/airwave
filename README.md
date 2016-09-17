@@ -113,6 +113,7 @@ If you will get success with another version, please contact me and I will updat
  Sonic Charge Cyclone | yes |
  Smartelectronix s(M)exoscope | yes |
  Spectrasonics Omnisphere | yes |
+ Spectrasonics Omnisphere 2 | yes | May require copying STEAM dir manually to place on install. Runs too slow with many presets to be usable on a decent laptop.
  SQ8L by Siegfried Kullmann | yes |
  SuperWave P8 | yes |
  Synapse Audio DUNE 2 | yes |

@@ -1,10 +1,10 @@
 ## About
-Airwave is a [WINE](https://www.winehq.org/)-based VST bridge, that allows for the use of Windows 32- and 64-bit VST 2.4 audio plugins with Linux VST hosts.
+Airwave is a [wine](https://www.winehq.org/) based VST bridge, that allows for the use of Windows 32- and 64-bit VST 2.4 audio plugins with Linux VST hosts.
 Due to the use of shared memory, only one extra copying is made for each data transfer. Airwave also uses the XEMBED protocol to correctly embed the plugin editor into the host window.
 
 ## Requirements
-- WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
-but earlier versions also may work). To solve the blank window issue you can apply [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch) to WINE.
+- wine, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
+but earlier versions also may work). To solve the blank window issue you can apply [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch) to wine.
 - libmagic
 - Qt5 for the airwave manager application (GUI)
 
@@ -49,8 +49,8 @@ Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
 ## Usage
 1. Run the airwave-manager
 2. Press the "Create link" button on the toolbar.
-3. Select desired WINE loader and WINE prefix in the appropriate combo boxes.
-4. Enter a path to VST plugin DLL file in the "VST plugin" field (you can use the "Browse" button for convenience). Note, that the path is relative to the selected WINE prefix.
+3. Select desired wine loader and wine prefix in the appropriate combo boxes.
+4. Enter a path to VST plugin DLL file in the "VST plugin" field (you can use the "Browse" button for convenience). Note, that the path is relative to the selected wine prefix.
 5. Enter a "Link location" path (the directory, where your VST host looks for the plugins).
 6. Enter a link name, if you don't like the auto-suggested one.
 7. Select a desired log level for this link. The higher the log level, the more messages you'll receive. The 'default' log level is a special value. It corresponds to the 'Default log level' value from the settings dialog. In most cases, the 'default' log level is the right choice. For maximum performance do not use a higher level than 'trace'.
@@ -68,7 +68,7 @@ The bridge consists of four components:
 When the airwave-plugin is loaded by the VST host, it obtains its absolute path and use it as the key to get the linked VST DLL from the configuration. Then it starts the airwave-host process and passes the path to the linked VST file. The airwave-host loads the VST DLL and works as a fake VST host. Starting from this point, the airwave-plugin and airwave-host act together like a proxy, translating commands between the native VST host and the Windows VST plugin.
 
 ## Known issues
-- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. You can workaround this issue by patching WINE with [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch).
+- Due to a bug in wine, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. You can workaround this issue by patching wine with [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch).
 
 ## Compatibility
 The following list is not complete. It contains only plugins, that have been tested by me or by people, who sent me a report.
@@ -106,13 +106,14 @@ If you will get success with another version, please contact me and I will updat
  Peavey Revalver Mark III.V | yes |
  ReFX Nexus2 | yes |
  ReFX Vanguard | yes |
- Reveal Sound Spire | yes | starting form 1.0.19 you need to override d2d1.dll in winecfg
+ Reveal Sound Spire | yes | starting from 1.0.19 you need to override d2d1.dll in winecfg
  Sonic Academy A.N.A. | yes |
  Sonic Academy KICK | yes |
  Sonic Cat LFX-1310 | yes |
  Sonic Charge Cyclone | yes |
  Smartelectronix s(M)exoscope | yes |
  Spectrasonics Omnisphere | yes |
+ Spectrasonics Omnisphere 2 | yes | May require copying STEAM dir manually to place on install. Runs too slow with many presets to be usable on a decent laptop.
  SQ8L by Siegfried Kullmann | yes |
  SuperWave P8 | yes |
  Synapse Audio DUNE 2 | yes |
@@ -123,5 +124,5 @@ If you will get success with another version, please contact me and I will updat
  u-he plugins | yes | Linux version is also available
  Variety of Sound plugins | yes |
  Voxengo plugins | mostly | inter plugin routing doesn't work (architecture issue)
- Xfer Serum | yes | you need to install native d2d1.dll and override it in winecfg
+ Xfer Serum | yes | install native GDI+ (run `winetricks gdiplus`)
  EZDrummer2, BFD3, XLN AD2 | yes | host need multi-channel support

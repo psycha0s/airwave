@@ -1,9 +1,9 @@
 About
-Airwave is a WINE-based VST bridge, that allows for the use of Windows 32- and 64-bit VST 2.4 audio plugins with Linux VST hosts.
+Airwave is a wine based VST bridge, that allows for the use of Windows 32- and 64-bit VST 2.4 audio plugins with Linux VST hosts.
 Due to the use of shared memory, only one extra copying is made for each data transfer. Airwave also uses the XEMBED protocol to correctly embed the plugin editor into the host window.
 
 Requirements
-- WINE, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
+- wine, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
 but earlier versions also may work)
 - libmagic
 - Qt5 for the airwave manager application (GUI)
@@ -40,8 +40,8 @@ Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
 Usage
 1. Run the airwave-manager
 2. Press the "Create link" button on the toolbar.
-3. Select desired WINE loader and WINE prefix in the appropriate combo boxes.
-4. Enter a path to VST plugin DLL file in the "VST plugin" field (you can use the "Browse" button for convenience). Note, that the path is relative to the selected WINE prefix.
+3. Select desired wine loader and wine prefix in the appropriate combo boxes.
+4. Enter a path to VST plugin DLL file in the "VST plugin" field (you can use the "Browse" button for convenience). Note, that the path is relative to the selected wine prefix.
 5. Enter a "Link location" path (the directory, where your VST host looks for the plugins).
 6. Enter a link name, if you don't like the auto-suggested one.
 7. Select a desired log level for this link. The higher the log level, the more messages you'll receive. The 'default' log level is a special value. It corresponds to the 'Default log level' value from the settings dialog. In most cases, the 'default' log level is the right choice. For maximum performance do not use a higher level than 'trace'.
@@ -59,4 +59,4 @@ The bridge consists of four components:
 When the airwave-plugin is loaded by the VST host, it obtains its absolute path and use it as the key to get the linked VST DLL from the configuration. Then it starts the airwave-host process and passes the path to the linked VST file. The airwave-host loads the VST DLL and works as a fake VST host. Starting from this point, the airwave-plugin and airwave-host act together like a proxy, translating commands between the native VST host and the Windows VST plugin.
 
 Known issues
-- Due to a bug in WINE, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. On some hosts (Bitwig Studio for example) this can be solved by closing and re-opening the plugin window.
+- Due to a bug in wine, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. On some hosts (Bitwig Studio for example) this can be solved by closing and re-opening the plugin window.

@@ -203,8 +203,8 @@ void FileDialog::setDirectory(const QString& path)
 
 void FileDialog::goUp()
 {
-	if(rootPath_ == model_->directory())
-		return;
+//	if(rootPath_ == model_->directory())
+//		return;
 
 	QDir dir(model_->directory() + "/..");
 	setDirectory(dir.absolutePath());

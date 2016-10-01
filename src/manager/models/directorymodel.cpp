@@ -167,7 +167,7 @@ Qt::ItemFlags DirectoryModel::flags(const QModelIndex& index) const
 	Qt::ItemFlags flags = GenericTreeModel<DirectoryItem>::flags(index);
 
 	DirectoryItem* item = indexToItem(index);
-	if(!item->isDirectory() && !isFilesEnabled_)
+	if(item && !item->isDirectory() && !isFilesEnabled_)
 		flags &= ~Qt::ItemIsEnabled;
 
 	return flags;

@@ -43,11 +43,14 @@ private:
 	DataPort controlPort_;
 	DataPort callbackPort_;
 	DataPort audioPort_;
+	DataPort processReplacingPort_;
 
 	Event condition_;
 
 	HANDLE audioThread_;
+    HANDLE processReplacingThread_;
 	std::atomic_flag runAudio_;
+	std::atomic_flag runProcessReplacing_;
 
 	bool isEditorOpen_;
 
@@ -61,6 +64,7 @@ private:
 	void destroyEditorWindow();
 
 	void audioThread();
+	void processReplacingThread();
 
 	void handleGetDataBlock(DataFrame* frame);
 	void handleSetDataBlock(DataFrame* frame);
@@ -77,6 +81,7 @@ private:
 			intptr_t value, void* ptr, float opt);
 
 	static DWORD CALLBACK audioThreadProc(void* param);
+    static DWORD CALLBACK processReplacingThreadProc(void* param);
 
 	static LRESULT CALLBACK windowProc(HWND hwnd, UINT message, WPARAM wParam,
 			LPARAM lParam);

@@ -139,6 +139,7 @@ Plugin::~Plugin()
 	controlPort_.disconnect();
 	callbackPort_.disconnect();
 	audioPort_.disconnect();
+	processReplacingPort_.disconnect();
 
 	TRACE("Waiting for child process termination...");
 
@@ -184,16 +185,22 @@ intptr_t Plugin::setBlockSize(DataPort* port, intptr_t frames)
 	if(audioPort_.frameSize() < frameSize) {
 		DEBUG("Setting block size to %d frames", frames);
 		audioPort_.disconnect();
+		processReplacingPort_.disconnect();
 
 		if(!audioPort_.create(frameSize)) {
 			ERROR("Unable to create audio port");
 			return 0;
 		}
+        if(!processReplacingPort_.create(frameSize)) {
+            ERROR("Unable to create processReplacing port");
+            return 0;
+        }
 
 		DataFrame* frame = controlPort_.frame<DataFrame>();
 		frame->command = Command::Dispatch;
 		frame->opcode = effSetBlockSize;
 		frame->index = audioPort_.id();
+		frame->value = processReplacingPort_.id();
 		port->sendRequest();
 		port->waitResponse();
 		return frame->value;
@@ -701,7 +708,7 @@ void Plugin::setParameter(i32 index, float value)
 
 void Plugin::processReplacing(float** inputs, float** outputs, i32 count)
 {
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame = processReplacingPort_.frame<DataFrame>();
 	frame->command = Command::ProcessSingle;
 	frame->value = count;
 	float* data = reinterpret_cast<float*>(frame->data);
@@ -711,8 +718,8 @@ void Plugin::processReplacing(float** inputs, float** outputs, i32 count)
 		data += count;
 	}
 
-	audioPort_.sendRequest();
-	audioPort_.waitResponse();
+	processReplacingPort_.sendRequest();
+	processReplacingPort_.waitResponse();
 
 	data = reinterpret_cast<float*>(frame->data);
 
@@ -810,7 +817,7 @@ void Plugin::processReplacingProc(AEffect* effect, float** inputs, float** outpu
 		i32 sampleCount)
 {
 	Plugin* plugin = static_cast<Plugin*>(effect->object);
-	RecursiveLock lock(plugin->audioGuard_);
+	RecursiveLock lock(plugin->processReplacingGuard_);
 	plugin->processReplacing(inputs, outputs, sampleCount);
 }
 

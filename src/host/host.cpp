@@ -31,7 +31,9 @@ Host::~Host()
 		TRACE("Waiting for audio thread termination...");
 
 		runAudio_.clear();
+		runProcessReplacing_.clear();
 		WaitForSingleObject(audioThread_, INFINITE);
+		WaitForSingleObject(processReplacingThread_, INFINITE);
 
 		destroyEditorWindow();
 
@@ -241,10 +243,7 @@ void Host::audioThread()
 		if(audioPort_.waitRequest(100)) {
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
-			if(frame->command == Command::ProcessSingle) {
-				handleProcessSingle();
-			}
-			else if(frame->command == Command::GetParameter) {
+			if(frame->command == Command::GetParameter) {
 				handleGetParameter();
 			}
 			else if(frame->command == Command::SetParameter) {
@@ -266,6 +265,24 @@ void Host::audioThread()
 	}
 }
 
+void Host::processReplacingThread()
+{
+    while(runProcessReplacing_.test_and_set()) {
+        if(processReplacingPort_.waitRequest(100)) {
+            DataFrame* frame = processReplacingPort_.frame<DataFrame>();
+
+            if(frame->command == Command::ProcessSingle) {
+                handleProcessSingle();
+            }
+            else {
+                ERROR("processReplacingThread() unacceptable command: %d", frame->command);
+            }
+
+            frame->command = Command::Response;
+            processReplacingPort_.sendResponse();
+        }
+    }
+}
 
 void Host::handleGetDataBlock(DataFrame* frame)
 {
@@ -345,15 +362,25 @@ bool Host::handleDispatch(DataFrame* frame)
 			runAudio_.clear();
 			WaitForSingleObject(audioThread_, INFINITE);
 		}
+		if(runProcessReplacing_.test_and_set()) {
+		    runProcessReplacing_.clear();
+		    WaitForSingleObject(processReplacingThread_, INFINITE);
+		}
 
 		audioPort_.disconnect();
 		if(!audioPort_.connect(frame->index)) {
 			ERROR("Unable to connect audio port");
 			return false;
 		}
+		processReplacingPort_.disconnect();
+        if(!processReplacingPort_.connect(frame->value)) {
+            ERROR("Unable to connect process replacing port");
+            return false;
+        }
 
 		runAudio_.test_and_set();
 		audioThread_ = CreateThread(nullptr, 0, audioThreadProc, this, 0, nullptr);
+		processReplacingThread_ = CreateThread(nullptr, 0, processReplacingThreadProc, this, 0, nullptr);
 
 		condition_.wait();
 
@@ -515,7 +542,7 @@ void Host::handleSetParameter()
 
 void Host::handleProcessSingle()
 {
-	DataFrame* frame = audioPort_.frame<DataFrame>();
+	DataFrame* frame = processReplacingPort_.frame<DataFrame>();
 
 	float* inputs[effect_->numInputs];
 	float* outputs[effect_->numOutputs];
@@ -706,6 +733,17 @@ DWORD CALLBACK Host::audioThreadProc(void* param)
 
 	TRACE("Audio thread terminated");
 	return 0;
+}
+
+DWORD CALLBACK Host::processReplacingThreadProc(void* param)
+{
+    TRACE("processReplacing thread started");
+
+    Host* host = static_cast<Host*>(param);
+    host->processReplacingThread();
+
+    TRACE("processReplacing thread terminated");
+    return 0;
 }
 
 

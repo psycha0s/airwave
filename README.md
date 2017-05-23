@@ -47,7 +47,7 @@ Due to the use of shared memory, only one extra copying is made for each data tr
 5. Go to the airwave source directory and execute the following commands:
 
   mkdir build && cd build
-  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave -DVSTSDK_PATH=./VST_SDK/VST3_SDK/ ..
+  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave -DVSTSDK_PATH=../VST_SDK/VST3_SDK/ .
   make
   sudo make install
 

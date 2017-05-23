@@ -1,48 +1,56 @@
 ## About
+
 Airwave is a [wine](https://www.winehq.org/) based VST bridge, that allows for the use of Windows 32- and 64-bit VST 2.4 audio plugins with Linux VST hosts.
 Due to the use of shared memory, only one extra copying is made for each data transfer. Airwave also uses the XEMBED protocol to correctly embed the plugin editor into the host window.
 
 ## Requirements
-- wine, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
-but earlier versions also may work). To solve the blank window issue you can apply [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch) to wine.
+
+- wine, supporting XEMBED protocol (versions greater than 1.7.19 were tested, but earlier versions also may work). To solve the blank window issue you can apply [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch) to wine.
 - libmagic
 - Qt5 for the airwave manager application (GUI)
 
 ## Building the source
+
 1. Install the required packages: multilib-enabled GCC, cmake, git, wine, Qt5, libmagic.
+
   * **Arch Linux (x86_64)** example:
-    ```
+
     sudo pacman -S gcc-multilib cmake git wine qt5-base
-    ```
 
   * **Fedora 20 (x86_64)** example:
-    ```
+
     sudo yum -y install gcc-c++ git cmake wine wine-devel wine-devel.i686 file file-devel libX11-devel libX11-devel.i686 qt5-devel glibc-devel.i686 glibc-devel
-    ```
 
   * **Ubuntu 14.04 (x86_64)** example:
-    ```
+
     sudo apt-get install git cmake gcc-multilib g++-multilib libx11-dev libx11-dev:i386 qt5-default libmagic-dev
     sudo add-apt-repository ppa:ubuntu-wine/ppa
     sudo apt-get update
     sudo apt-get install wine1.7 wine1.7-dev
-    ```
-2. Get the VST Audio Plugins SDK [from Steinberg](http://www.steinberg.net/en/company/developers.html). I cannot distribute it myself due to the license restrictions.
 
-3. Unpack the VST SDK archive. Further I'll assume that you have unpacked it in your home directory: ${HOME}/VST3\ SDK.
+  * **Debian 9 Stretch (x86_64)** example:
+
+    sudo apt-get install git cmake gcc-multilib g++-multilib libx11-dev libx11-dev:i386 qt5-default libmagic-dev wine wine-development
+
+2. Get the VST Audio Plugins SDK from Steinberg (http://www.steinberg.net/en/company/developers.html). I cannot distribute it myself due to the license restrictions.
+
+    wget http://www.steinberg.net/sdk_downloads/vstsdk367_03_03_2017_build_352.zip
+
+3. Unpack the VST SDK archive.
+
+    unzip vstsdk367_03_03_2017_build_352.zip
 
 4. Clone the airwave GIT repository
-  ```
-  git clone https://github.com/phantom-code/airwave.git
-  ```
+
+    git clone https://github.com/phantom-code/airwave.git
 
 5. Go to the airwave source directory and execute the following commands:
-  ```
+
   mkdir build && cd build
-  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave -DVSTSDK_PATH=${HOME}/VST3\ SDK ..
+  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave -DVSTSDK_PATH=./VST_SDK/VST3_SDK/ ..
   make
   sudo make install
-  ```
+
 
 Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
 
@@ -60,7 +68,7 @@ Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
 
 ## Under the hood
 The bridge consists of four components:
-- Plugin endpoint (airwave-plugin.so)
+- Plugin endpoint (airwave-plugin-<arch>.so)
 - Host endpoint (airwave-host-{arch}.exe.so and airwave-host-{arch}.exe launcher script)
 - Configuration file (${XDG_CONFIG_PATH}/airwave/airwave.conf)
 - GUI configurator (airwave-manager)

@@ -30,7 +30,7 @@ Due to the use of shared memory, only one extra copying is made for each data tr
 
   * **Debian 9 Stretch (x86_64)** example:
 
-    sudo apt-get install git cmake gcc-multilib g++-multilib libx11-dev libx11-dev:i386 qt5-default libmagic-dev wine wine-development
+    sudo apt-get install git cmake gcc-multilib g++-multilib libx11-dev libx11-dev:i386 qt5-default libmagic-dev wine64 wine64-development wine64-tools
 
 2. Get the VST Audio Plugins SDK from Steinberg (http://www.steinberg.net/en/company/developers.html). I cannot distribute it myself due to the license restrictions.
 

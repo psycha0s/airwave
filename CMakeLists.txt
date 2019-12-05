@@ -38,7 +38,7 @@ endif()
 
 # Set compiler flags
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-	set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -D__WIDL_objidl_generated_name_0000000C=")
 	set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g3")

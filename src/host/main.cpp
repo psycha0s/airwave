@@ -8,7 +8,7 @@
 using namespace Airwave;
 
 
-int main(int argc, const char* argv[])
+int __cdecl main(int argc, const char* argv[])
 {
 	if(argc != 5) {
 		fprintf(stderr, "Airwave host endpoint, version " VERSION_STRING);

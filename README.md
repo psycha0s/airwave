@@ -56,7 +56,7 @@ Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
 7. Select a desired log level for this link. The higher the log level, the more messages you'll receive. The 'default' log level is a special value. It corresponds to the 'Default log level' value from the settings dialog. In most cases, the 'default' log level is the right choice. For maximum performance do not use a higher level than 'trace'.
 7. Press the "OK" button. At this point, your VST host should be able to find a new plugin inside of the "Link location" directory.
 
-**Note:** After you have created the link you cannot move/rename it with a file manager. All updates have to be done inside the airwave-manager. Also, you should update your links after updating the airwave itself. This could be achived by pressing the "Update links" button.
+**Note:** After you have created the link you cannot move/rename it with a file manager. All updates have to be done inside the airwave-manager. Also, you should update your links after updating the airwave itself. This could be achieved by pressing the "Update links" button.
 
 ## Under the hood
 The bridge consists of four components:
